@@ -62,6 +62,40 @@ function render(state) {
     ${centerHtml}
     <div class="bracket-half">${rightHtml}</div>
   `;
+
+  fitAndCenter();
+}
+
+function fitAndCenter() {
+  if (!board.innerHTML.trim()) return;
+
+  board.style.transform = 'none';
+  board.style.left = '0px';
+  board.style.top = '0px';
+
+  const naturalWidth = board.offsetWidth;
+  const naturalHeight = board.offsetHeight;
+  if (!naturalWidth || !naturalHeight) return;
+
+  const margin = 0.94;
+  const scale = Math.min(
+    (window.innerWidth * margin) / naturalWidth,
+    (window.innerHeight * margin) / naturalHeight
+  );
+
+  const left = (window.innerWidth - naturalWidth * scale) / 2;
+  const top = (window.innerHeight - naturalHeight * scale) / 2;
+
+  board.style.transformOrigin = 'top left';
+  board.style.left = `${left}px`;
+  board.style.top = `${top}px`;
+  board.style.transform = `scale(${scale})`;
+}
+
+window.addEventListener('resize', fitAndCenter);
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(fitAndCenter);
 }
 
 socket.on('state', render);

@@ -34,7 +34,10 @@ Two pages are served:
   final in the center with the champion showcased beneath it once decided.
   Each team's flag/logo (if it has one) is shown before its name. Colors
   follow whichever of the six overlay styles is currently selected, same as
-  the clock/penalty scenes.
+  the clock/penalty scenes. It auto-scales and centers on both axes to fill
+  as much of the Browser Source as it can without distortion, regardless of
+  whether it's a 4, 8, or 16-team bracket — see "Bracket overlay scaling"
+  below.
 
 ## Overlay styles
 
@@ -261,3 +264,20 @@ looks up that matchup via `computeBracketRounds` and, if both sides are
 resolved, overwrites `state.teamA`/`state.teamB` with their name/colors/logo
 and resets score/clock/penalties — it's the bridge between "who's playing
 next in the tournament" and "what the scoreboard overlay currently shows."
+
+### Bracket overlay scaling
+
+A 4-team bracket and a 16-team bracket have very different natural
+dimensions (a few hundred pixels wide vs. well over a thousand), so pure CSS
+centering isn't enough to make both "fill the screen" — one would look tiny,
+the other might overflow. `bracket-overlay.js`'s `fitAndCenter()` measures
+the board's actual rendered size at `transform: none` (so the measurement
+isn't affected by a previous scale), computes a single uniform scale factor
+(`Math.min` of the width-fit and height-fit ratios, so it never distorts
+the aspect ratio or overflows either dimension), then sets `left`/`top`/
+`transform: scale(...)` so the scaled box is centered on both axes with a
+small margin from the edges. It re-runs on `window.resize` and once more
+after `document.fonts.ready` resolves, since the Oswald web font can still
+be using fallback metrics at the moment of the first render — without that
+second pass the vertical centering can be off by several pixels until the
+real font settles in.
