@@ -67,12 +67,20 @@ second, which is fine for this use case. Hitting the Cloud Run URL directly
 gets you a real WebSocket with no proxy in between, since Cloud Run supports
 WebSockets natively.
 
+**Important:** match state lives in one process's memory (`server.js`), not
+a database, so the Cloud Run service is pinned to `--max-instances=1`. If it
+were allowed to scale to multiple instances, the control panel and overlay
+could land on different instances with different state and silently drift
+out of sync (this happened during initial setup — the default max-instances
+lets Cloud Run scale out during any burst of traffic). Always redeploy with
+`--max-instances=1` as below rather than a bare `gcloud run deploy`.
+
 ### Redeploying
 
 ```bash
 # after changing server.js / public/*
 gcloud run deploy match-score-manager --source . --region us-central1 \
-  --allow-unauthenticated --project match-score-manager
+  --allow-unauthenticated --project match-score-manager --max-instances=1
 
 # after changing firebase.json/hosting/ only
 firebase deploy --only hosting --project match-score-manager
