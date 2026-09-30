@@ -124,6 +124,7 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
+  gap: 14px;
 }
 
 .match-box {
@@ -136,7 +137,7 @@ html, body {
 .match-side {
   display: flex;
   align-items: center;
-  padding: 7px 12px;
+  padding: 13px 14px;
   font-size: 14px;
   font-weight: 600;
   color: #cbd5e1;
