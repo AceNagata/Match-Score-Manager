@@ -31,16 +31,17 @@ html, body {
 .extra-badge {
   position: absolute;
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: 4px;
-  font-size: 11px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  margin-top: 6px;
+  text-align: center;
+  font-size: 14px;
   font-weight: 700;
   background: #f59e0b;
   color: #111;
   border-radius: 3px;
-  padding: 2px 8px;
-  white-space: nowrap;
+  padding: 5px 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35);
 }
 
@@ -111,6 +112,7 @@ html, body {
 
 /* ================= Classic ================= */
 .style-classic .row {
+  position: relative;
   display: flex;
   align-items: stretch;
   height: 56px;
@@ -183,6 +185,10 @@ html, body {
 }
 
 /* ================= Banner ================= */
+.style-banner .banner-wrap {
+  position: relative;
+}
+
 .style-banner .banner-row {
   display: flex;
   align-items: stretch;
@@ -284,6 +290,7 @@ html, body {
 
 /* ================= Badges ================= */
 .style-badges .row {
+  position: relative;
   display: flex;
   align-items: stretch;
   height: 58px;
@@ -366,10 +373,15 @@ html, body {
 }
 
 /* ================= Flags / VS ================= */
+.style-flags .flags-wrap {
+  position: relative;
+  width: 760px;
+}
+
 .style-flags .flags-row {
   display: flex;
   align-items: stretch;
-  width: 760px;
+  width: 100%;
   height: 58px;
   border-radius: 4px;
   overflow: hidden;
@@ -485,6 +497,7 @@ html, body {
 
 /* ================= Neon ================= */
 .style-neon .row {
+  position: relative;
   display: flex;
   align-items: stretch;
   height: 56px;
@@ -563,6 +576,7 @@ html, body {
 
 /* ================= Champions ================= */
 .style-champions .row {
+  position: relative;
   display: flex;
   align-items: stretch;
   height: 58px;

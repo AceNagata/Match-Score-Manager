@@ -70,12 +70,13 @@ const renderers = {
   classic(state) {
     const main = `
       <div class="row">
-        <div class="clock">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
+        <div class="clock">${formatClock(state.timer.seconds)}</div>
         <div class="score-strip">
           <span class="team-name">${teamChip(state.teamA)}${esc(state.teamA.name)}</span>
           <span class="score">${state.teamA.score} - ${state.teamB.score}</span>
           <span class="team-name">${esc(state.teamB.name)}${teamChip(state.teamB)}</span>
         </div>
+        ${extraBadge(state.timer.extra)}
       </div>
     `;
     return { main, penalty: penaltyBlock(state) };
@@ -83,16 +84,19 @@ const renderers = {
 
   banner(state) {
     const main = `
-      <div class="banner-row">
-        <div class="team-block team-a" style="background:${twoToneBg(state.teamA)}">
-          ${logoImg(state.teamA.logo, 'team-logo')}<span>${esc(state.teamA.name)}</span>
+      <div class="banner-wrap">
+        <div class="banner-row">
+          <div class="team-block team-a" style="background:${twoToneBg(state.teamA)}">
+            ${logoImg(state.teamA.logo, 'team-logo')}<span>${esc(state.teamA.name)}</span>
+          </div>
+          <div class="score-block">${state.teamA.score} - ${state.teamB.score}</div>
+          <div class="team-block team-b" style="background:${twoToneBg(state.teamB)}">
+            <span>${esc(state.teamB.name)}</span>${logoImg(state.teamB.logo, 'team-logo')}
+          </div>
         </div>
-        <div class="score-block">${state.teamA.score} - ${state.teamB.score}</div>
-        <div class="team-block team-b" style="background:${twoToneBg(state.teamB)}">
-          <span>${esc(state.teamB.name)}</span>${logoImg(state.teamB.logo, 'team-logo')}
-        </div>
+        <div class="clock-pill">${formatClock(state.timer.seconds)}</div>
+        ${extraBadge(state.timer.extra)}
       </div>
-      <div class="clock-pill">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
     `;
     return { main, penalty: penaltyBlock(state) };
   },
@@ -100,12 +104,13 @@ const renderers = {
   badges(state) {
     const main = `
       <div class="row">
-        <div class="clock">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
+        <div class="clock">${formatClock(state.timer.seconds)}</div>
         <div class="score-strip">
           <span class="team-side">${logoImg(state.teamA.logo, 'team-logo')}${teamChip(state.teamA)}<span>${esc(state.teamA.name)}</span></span>
           <span class="score-box">${state.teamA.score} - ${state.teamB.score}</span>
           <span class="team-side"><span>${esc(state.teamB.name)}</span>${teamChip(state.teamB)}${logoImg(state.teamB.logo, 'team-logo')}</span>
         </div>
+        ${extraBadge(state.timer.extra)}
       </div>
     `;
     return { main, penalty: penaltyBlock(state, { withLogos: true }) };
@@ -113,19 +118,22 @@ const renderers = {
 
   flags(state) {
     const main = `
-      <div class="flags-row">
-        <div class="clock-chip">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
-        <div class="flags-main">
-          <div class="flag-team team-a" style="background:${twoToneBg(state.teamA)}">
-            <span class="flag-name">${esc(state.teamA.name)}</span>${logoImg(state.teamA.logo, 'flag-img')}
-          </div>
-          <div class="flags-score">
-            <span>${state.teamA.score}</span><span class="vs">VS</span><span>${state.teamB.score}</span>
-          </div>
-          <div class="flag-team team-b" style="background:${twoToneBg(state.teamB)}">
-            ${logoImg(state.teamB.logo, 'flag-img')}<span class="flag-name">${esc(state.teamB.name)}</span>
+      <div class="flags-wrap">
+        <div class="flags-row">
+          <div class="clock-chip">${formatClock(state.timer.seconds)}</div>
+          <div class="flags-main">
+            <div class="flag-team team-a" style="background:${twoToneBg(state.teamA)}">
+              <span class="flag-name">${esc(state.teamA.name)}</span>${logoImg(state.teamA.logo, 'flag-img')}
+            </div>
+            <div class="flags-score">
+              <span>${state.teamA.score}</span><span class="vs">VS</span><span>${state.teamB.score}</span>
+            </div>
+            <div class="flag-team team-b" style="background:${twoToneBg(state.teamB)}">
+              ${logoImg(state.teamB.logo, 'flag-img')}<span class="flag-name">${esc(state.teamB.name)}</span>
+            </div>
           </div>
         </div>
+        ${extraBadge(state.timer.extra)}
       </div>
     `;
     return { main, penalty: penaltyBlock(state, { withLogos: true }) };
@@ -135,7 +143,7 @@ const renderers = {
     const hex = `<svg class="hex" viewBox="0 0 24 24"><polygon points="12,2 21,7 21,17 12,22 3,17 3,7" fill="none" stroke="#c6f135" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#c6f135"/></svg>`;
     const main = `
       <div class="row">
-        <div class="clock">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
+        <div class="clock">${formatClock(state.timer.seconds)}</div>
         <div class="score-strip">
           <span class="team-name">${teamChip(state.teamA)}${esc(state.teamA.name)}</span>
           <span class="score">${state.teamA.score}</span>
@@ -143,6 +151,7 @@ const renderers = {
           <span class="score">${state.teamB.score}</span>
           <span class="team-name">${esc(state.teamB.name)}${teamChip(state.teamB)}</span>
         </div>
+        ${extraBadge(state.timer.extra)}
       </div>
     `;
     return { main, penalty: penaltyBlock(state) };
@@ -154,7 +163,7 @@ const renderers = {
       : '<span class="comp-logo">⚽</span>';
     const main = `
       <div class="row">
-        <div class="clock">${comp}${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
+        <div class="clock">${comp}${formatClock(state.timer.seconds)}</div>
         <div class="score-strip">
           <span class="team-name">${teamChip(state.teamA)}${esc(state.teamA.name)}</span>
           <span class="bracket left">❯</span>
@@ -163,6 +172,7 @@ const renderers = {
           <span class="bracket right">❮</span>
           <span class="team-name">${esc(state.teamB.name)}${teamChip(state.teamB)}</span>
         </div>
+        ${extraBadge(state.timer.extra)}
       </div>
     `;
     return { main, penalty: penaltyBlock(state, { withLogos: true, stripe: true }) };

@@ -63,13 +63,16 @@ a bracket matchup.
 
 ### Extra time
 
-When extra time is set (`Extra time` +/- in the control panel), a small
-`+N` tab appears hanging directly beneath the clock in every style's clock
-element (`classic`/`badges`/`neon`/`champions`'s `.clock`, `banner`'s
-`.clock-pill`, `flags`'s `.clock-chip`). It's implemented as one shared
-`.extra-badge` CSS rule (`position: absolute; top: 100%`) anchored to
-whichever clock element is `position: relative` — no per-style JS is needed
-to place it correctly.
+When extra time is set (`Extra time` +/- in the control panel), a full-width
+bar drops down beneath the *entire* scoreboard row (not just the clock),
+with the `+N` centered in it — like a drawer opening under the whole bug.
+It's one shared `.extra-badge` CSS rule (`position: absolute; top: 100%;
+left: 0; right: 0`) anchored to whichever row-level container is
+`position: relative`: `.row` for `classic`/`badges`/`neon`/`champions`,
+`.banner-wrap` for `banner`, `.flags-wrap` for `flags`. `banner` and `flags`
+needed a wrapper element because their own row has a `filter`/`overflow`
+that would otherwise clip anything positioned outside it — the badge lives
+one level up, alongside the row, instead of inside it.
 
 ## Setup
 
