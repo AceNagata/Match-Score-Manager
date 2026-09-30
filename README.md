@@ -12,6 +12,12 @@ Two pages are served:
   Browser Source in OBS. It updates live over WebSockets whenever something
   changes in the control panel, so it can run on the same machine or a
   separate one on the same network.
+- **Overlay scenes** (`/overlay/clock/`, `/overlay/penalty/`) — the same
+  overlay split into just the clock/score/names, or just the penalty panel,
+  as separate Browser Sources. Useful if you want to position or scene-switch
+  them independently in OBS instead of moving the combined `/overlay/` as one
+  block. All three (plus any future scene) render from the same live state,
+  so they're always in sync with each other and with the control panel.
 
 ## Overlay styles
 
@@ -92,14 +98,55 @@ the pay-as-you-go **Blaze** plan (required for Cloud Run) — usage at this
 scale should stay within the free tier of both Cloud Run and Firebase
 Hosting, but it's not the free Spark plan.
 
+### Access control
+
+The live deployment is public with no login (`--allow-unauthenticated`), so
+writes to match state are gated by a shared secret instead: the server only
+applies a `control:update` event if it carries the right `token`, set via the
+`CONTROL_TOKEN` environment variable on the Cloud Run service. The control
+panel has a small "Access token" field (top of the page) that saves the token
+to that browser's `localStorage` and attaches it to every update it sends.
+The overlay pages don't need a token — they only ever read state, never
+write it.
+
+**This matters in practice, not just in theory:** within a few minutes of
+the first `--allow-unauthenticated` deploy (before this token gate existed),
+something external had already connected and started changing the score,
+timer, and penalties — almost certainly an automated scanner that found the
+freshly-issued `.web.app` TLS certificate via Certificate Transparency log
+monitoring, which is common within minutes of any new HTTPS domain going
+live. Without the token, anyone with the URL (or anyone who just opens the
+overlay page's browser console and calls `socket.emit('control:update', ...)`
+directly, bypassing the control panel's UI entirely) can hijack a live
+broadcast's scoreboard. Never redeploy without `CONTROL_TOKEN` set once this
+is public.
+
+To rotate the token:
+
+```bash
+gcloud run services update match-score-manager --region us-central1 \
+  --project match-score-manager --update-env-vars CONTROL_TOKEN=<new-token>
+```
+
+Then update the token in the control panel's "Access token" field on every
+device/browser that uses it (old sessions won't be able to write until you
+do). Locally (`npm start`), `CONTROL_TOKEN` is unset by default, so local dev
+has no token gate — that's fine since it's bound to localhost only.
+
 ## Adding the overlay to OBS
 
 1. In OBS, add a **Browser Source**.
-2. Set the URL to the overlay URL — the live one above, or
-   `http://localhost:4000/overlay/` when running locally.
+2. Set the URL to one of the overlay URLs — the combined `/overlay/`, or the
+   split `/overlay/clock/` / `/overlay/penalty/` scenes — live above, or
+   `http://localhost:4000/overlay/...` when running locally.
 3. Set the width/height to match your canvas (e.g. 1920x1080).
 4. Leave "Shutdown source when not visible" unchecked so it keeps receiving
    live updates.
+5. If you're using the split scenes, add `/overlay/clock/` and
+   `/overlay/penalty/` as two separate Browser Sources so you can position,
+   scale, or scene-switch them independently — e.g. keep the clock on screen
+   throughout but only bring in the penalty panel as its own scene during a
+   shootout.
 
 The overlay background is transparent, so it composites directly over your
 camera/game capture.
@@ -117,9 +164,15 @@ all render from the same server-pushed state.
 The overlay (`public/overlay/overlay.js`) is style-driven: one `<div id="board">`
 gets its `innerHTML` replaced by whichever style's render function runs for
 the current state, with matching CSS scoped under `.board.style-<name>` in
-`overlay.css`. Adding a new style means adding one render function plus one
-CSS block — no changes to the state shape or the control panel are needed
-unless the style needs new data.
+`overlay.css`. Each style's render function returns `{ main, penalty }` —
+the clock/team/score markup and the penalty-panel markup as separate pieces.
+`public/overlay/index.html` renders both (the combined view);
+`public/overlay/clock/index.html` and `public/overlay/penalty/index.html`
+set `window.OVERLAY_MODE` to `'clock'` or `'penalty'` before loading the same
+`overlay.js`/`overlay.css`, so only that piece renders. Adding a new style
+means adding one render function plus one CSS block; adding a new scene
+means adding a new folder whose `index.html` sets `OVERLAY_MODE` and includes
+the same shared JS/CSS — no server changes needed either way.
 
 State lives in memory only and resets when the server restarts — there's no
 database. That's a deliberate v1 boundary; if you need it to survive

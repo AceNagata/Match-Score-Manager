@@ -1,5 +1,6 @@
 const socket = io();
 const board = document.getElementById('board');
+const MODE = window.OVERLAY_MODE || 'full';
 
 function esc(value) {
   return String(value)
@@ -24,7 +25,7 @@ function logoImg(src, className) {
 }
 
 function penaltyRows(state, options = {}) {
-  const rows = ['teamA', 'teamB']
+  return ['teamA', 'teamB']
     .map((team) => {
       const t = state[team];
       const slots = state.penalties[team];
@@ -46,12 +47,16 @@ function penaltyRows(state, options = {}) {
       return `<div class="pen-row"${stripe}><span class="team-label">${logo}${esc(t.name)}</span>${dots}<span class="pen-total">${made}</span></div>`;
     })
     .join('');
-  return rows;
+}
+
+function penaltyBlock(state, options = {}) {
+  if (!state.penalties.active) return '';
+  return `<div class="penalties"><h4>PENALTIES</h4>${penaltyRows(state, options)}</div>`;
 }
 
 const renderers = {
   classic(state) {
-    return `
+    const main = `
       <div class="row">
         <div class="clock">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
         <div class="score-strip">
@@ -60,12 +65,12 @@ const renderers = {
           <span>${esc(state.teamB.name)}</span>
         </div>
       </div>
-      ${state.penalties.active ? `<div class="penalties"><h4>PENALTIES</h4>${penaltyRows(state)}</div>` : ''}
     `;
+    return { main, penalty: penaltyBlock(state) };
   },
 
   banner(state) {
-    return `
+    const main = `
       <div class="banner-row">
         <div class="team-block team-a" style="background:${state.teamA.color}">
           ${logoImg(state.teamA.logo, 'team-logo')}<span>${esc(state.teamA.name)}</span>
@@ -76,12 +81,12 @@ const renderers = {
         </div>
       </div>
       <div class="clock-pill">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
-      ${state.penalties.active ? `<div class="penalties"><h4>PENALTIES</h4>${penaltyRows(state)}</div>` : ''}
     `;
+    return { main, penalty: penaltyBlock(state) };
   },
 
   badges(state) {
-    return `
+    const main = `
       <div class="row">
         <div class="clock">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
         <div class="score-strip">
@@ -90,12 +95,12 @@ const renderers = {
           <span class="team-side"><span>${esc(state.teamB.name)}</span>${logoImg(state.teamB.logo, 'team-logo')}</span>
         </div>
       </div>
-      ${state.penalties.active ? `<div class="penalties"><h4>PENALTIES</h4>${penaltyRows(state, { withLogos: true })}</div>` : ''}
     `;
+    return { main, penalty: penaltyBlock(state, { withLogos: true }) };
   },
 
   flags(state) {
-    return `
+    const main = `
       <div class="flags-row">
         <div class="clock-chip">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
         <div class="flags-main">
@@ -110,13 +115,13 @@ const renderers = {
           </div>
         </div>
       </div>
-      ${state.penalties.active ? `<div class="penalties"><h4>PENALTIES</h4>${penaltyRows(state, { withLogos: true })}</div>` : ''}
     `;
+    return { main, penalty: penaltyBlock(state, { withLogos: true }) };
   },
 
   neon(state) {
     const hex = `<svg class="hex" viewBox="0 0 24 24"><polygon points="12,2 21,7 21,17 12,22 3,17 3,7" fill="none" stroke="#c6f135" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="#c6f135"/></svg>`;
-    return `
+    const main = `
       <div class="row">
         <div class="clock">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
         <div class="score-strip">
@@ -127,15 +132,15 @@ const renderers = {
           <span>${esc(state.teamB.name)}</span>
         </div>
       </div>
-      ${state.penalties.active ? `<div class="penalties"><h4>PENALTIES</h4>${penaltyRows(state)}</div>` : ''}
     `;
+    return { main, penalty: penaltyBlock(state) };
   },
 
   champions(state) {
     const comp = state.competitionLogo
       ? `<img class="comp-logo" src="${state.competitionLogo}" />`
       : '<span class="comp-logo">⚽</span>';
-    return `
+    const main = `
       <div class="row">
         <div class="clock">${comp}${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
         <div class="score-strip">
@@ -147,15 +152,22 @@ const renderers = {
           <span>${esc(state.teamB.name)}</span>
         </div>
       </div>
-      ${state.penalties.active ? `<div class="penalties"><h4>PENALTIES</h4>${penaltyRows(state, { withLogos: true, stripe: true })}</div>` : ''}
     `;
+    return { main, penalty: penaltyBlock(state, { withLogos: true, stripe: true }) };
   },
 };
 
 function render(state) {
   const renderer = renderers[state.style] || renderers.classic;
+  const { main, penalty } = renderer(state);
   board.className = `board style-${state.style}`;
-  board.innerHTML = renderer(state);
+  if (MODE === 'clock') {
+    board.innerHTML = main;
+  } else if (MODE === 'penalty') {
+    board.innerHTML = penalty;
+  } else {
+    board.innerHTML = main + penalty;
+  }
 }
 
 socket.on('state', render);

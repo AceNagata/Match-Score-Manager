@@ -4,6 +4,7 @@ const express = require('express');
 const { Server } = require('socket.io');
 
 const PORT = process.env.PORT || 4000;
+const CONTROL_TOKEN = process.env.CONTROL_TOKEN || null;
 
 const app = express();
 const server = http.createServer(app);
@@ -115,6 +116,7 @@ io.on('connection', (socket) => {
 
   socket.on('control:update', (patch) => {
     if (!patch || typeof patch.type !== 'string') return;
+    if (CONTROL_TOKEN && patch.token !== CONTROL_TOKEN) return;
     applyPatch(patch);
     broadcastState();
   });

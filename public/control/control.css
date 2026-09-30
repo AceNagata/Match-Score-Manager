@@ -24,9 +24,46 @@ header h1 {
 }
 
 header p {
-  margin: 0 0 24px;
+  margin: 0 0 16px;
   color: #94a3b8;
   font-size: 14px;
+}
+
+.token-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 10px 14px;
+  background: #1e293b;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.token-row input {
+  flex: 1;
+  max-width: 220px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.token-row button {
+  padding: 7px 14px;
+  font-size: 13px;
+}
+
+.token-status.ok {
+  color: #4ade80;
+}
+
+.token-status.missing {
+  color: #f87171;
 }
 
 header p code {
