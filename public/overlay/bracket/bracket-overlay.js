@@ -14,7 +14,8 @@ function sideHtml(match, side) {
   const classes = ['match-side'];
   if (!team) classes.push('tbd');
   if (match.winner === side) classes.push('winner');
-  return `<div class="${classes.join(' ')}">${esc(team ? team.name : 'TBD')}</div>`;
+  const logo = team && team.logo ? `<img class="match-logo" src="${team.logo}" />` : '';
+  return `<div class="${classes.join(' ')}">${logo}<span>${esc(team ? team.name : 'TBD')}</span></div>`;
 }
 
 function matchBoxHtml(match) {

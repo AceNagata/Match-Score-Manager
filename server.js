@@ -1,5 +1,6 @@
 const path = require('path');
 const http = require('http');
+const crypto = require('crypto');
 const express = require('express');
 const { Server } = require('socket.io');
 const { computeBracketRounds } = require('./public/shared/bracket-utils.js');
@@ -20,15 +21,20 @@ const DEFAULT_BRACKET_COLORS = [
   '#7c3aed', '#0891b2', '#db2777', '#65a30d',
 ];
 
+function createBlankBracketSlot(index) {
+  return {
+    name: `TEAM ${index + 1}`,
+    color: DEFAULT_BRACKET_COLORS[index % DEFAULT_BRACKET_COLORS.length],
+    secondaryColor: '#ffffff',
+    logo: null,
+    rosterId: null,
+  };
+}
+
 function createInitialBracket(size = 8) {
   return {
     size,
-    teams: Array.from({ length: size }, (_, i) => ({
-      name: `TEAM ${i + 1}`,
-      color: DEFAULT_BRACKET_COLORS[i % DEFAULT_BRACKET_COLORS.length],
-      secondaryColor: '#ffffff',
-      logo: null,
-    })),
+    teams: Array.from({ length: size }, (_, i) => createBlankBracketSlot(i)),
     picks: {},
   };
 }
@@ -46,6 +52,7 @@ function createInitialState() {
     style: 'classic',
     competitionLogo: null,
     bracket: createInitialBracket(),
+    teamRoster: [],
   };
 }
 
@@ -128,8 +135,10 @@ function applyPatch(patch) {
     case 'resetMatch': {
       pauseTimer();
       const bracket = state.bracket;
+      const teamRoster = state.teamRoster;
       state = createInitialState();
       state.bracket = bracket;
+      state.teamRoster = teamRoster;
       break;
     }
     case 'bracketSetSize':
@@ -157,6 +166,64 @@ function applyPatch(patch) {
         state.bracket.teams[patch.index].logo = typeof patch.value === 'string' ? patch.value : null;
       }
       break;
+    case 'rosterAddTeam': {
+      state.teamRoster.push({
+        id: crypto.randomUUID(),
+        name: String(patch.name || 'NEW TEAM').slice(0, 24),
+        color: patch.color || '#64748b',
+        secondaryColor: patch.secondaryColor || '#ffffff',
+        logo: null,
+      });
+      break;
+    }
+    case 'rosterSetName': {
+      const t = state.teamRoster.find((r) => r.id === patch.id);
+      if (t) t.name = String(patch.value).slice(0, 24);
+      break;
+    }
+    case 'rosterSetColor': {
+      const t = state.teamRoster.find((r) => r.id === patch.id);
+      if (t) t.color = patch.value;
+      break;
+    }
+    case 'rosterSetSecondaryColor': {
+      const t = state.teamRoster.find((r) => r.id === patch.id);
+      if (t) t.secondaryColor = patch.value;
+      break;
+    }
+    case 'rosterSetLogo': {
+      const t = state.teamRoster.find((r) => r.id === patch.id);
+      if (t) t.logo = typeof patch.value === 'string' ? patch.value : null;
+      break;
+    }
+    case 'rosterRemoveTeam': {
+      state.teamRoster = state.teamRoster.filter((r) => r.id !== patch.id);
+      state.bracket.teams.forEach((slot, i) => {
+        if (slot.rosterId === patch.id) {
+          state.bracket.teams[i] = createBlankBracketSlot(i);
+        }
+      });
+      break;
+    }
+    case 'bracketAssignTeam': {
+      const slotIndex = patch.index;
+      if (state.bracket.teams[slotIndex] === undefined) break;
+      if (!patch.teamId) {
+        state.bracket.teams[slotIndex] = createBlankBracketSlot(slotIndex);
+        break;
+      }
+      const rosterTeam = state.teamRoster.find((r) => r.id === patch.teamId);
+      if (rosterTeam) {
+        state.bracket.teams[slotIndex] = {
+          name: rosterTeam.name,
+          color: rosterTeam.color,
+          secondaryColor: rosterTeam.secondaryColor,
+          logo: rosterTeam.logo,
+          rosterId: rosterTeam.id,
+        };
+      }
+      break;
+    }
     case 'bracketPickWinner': {
       const { round, match, side } = patch;
       if (!state.bracket.picks[round]) state.bracket.picks[round] = {};

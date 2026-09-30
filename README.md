@@ -19,17 +19,22 @@ Two pages are served:
   block. All three (plus any future scene) render from the same live state,
   so they're always in sync with each other and with the control panel.
 - **Bracket Maker** (`/control/bracket/`) — build a 4/8/16-team single-
-  elimination bracket: name each entrant, optionally give them a color and
-  logo, advance winners round by round, and see the champion crowned. A
-  "▶ Start This Match" button on any matchup (once both sides are known)
-  loads that pairing's names/colors/logos straight into the main match
+  elimination bracket. A **Team Roster** section at the top is where you
+  create teams once — name, primary/secondary color, flag/logo — and each
+  bracket slot is a dropdown you assign a roster team to, instead of typing
+  a name into every slot. A team already placed in the bracket is excluded
+  from every other slot's dropdown, so you can't accidentally put the same
+  team in twice. Advance winners round by round and see the champion crowned.
+  A "▶ Start This Match" button on any matchup (once both sides are known)
+  loads that pairing's name/colors/logo straight into the main match
   scoreboard — score, clock, and penalties all reset for the new match — so
   you don't have to retype anything when a tournament match kicks off.
 - **Bracket overlay** (`/overlay/bracket/`) — the tournament bracket as a
   Browser Source: earlier rounds fan out left and right, converging on the
   final in the center with the champion showcased beneath it once decided.
-  Its colors follow whichever of the six overlay styles is currently
-  selected, same as the clock/penalty scenes.
+  Each team's flag/logo (if it has one) is shown before its name. Colors
+  follow whichever of the six overlay styles is currently selected, same as
+  the clock/penalty scenes.
 
 ## Overlay styles
 
@@ -216,15 +221,35 @@ restarts, the natural place to add persistence is a JSON file write on every
 
 ### Bracket
 
+`state.teamRoster` is a flat array of reusable team profiles —
+`{ id, name, color, secondaryColor, logo }` — created and edited from the
+Team Roster section of the bracket maker (`rosterAddTeam`/`rosterSetName`/
+`rosterSetColor`/`rosterSetSecondaryColor`/`rosterSetLogo`/`rosterRemoveTeam`).
+It's independent of any one bracket, so the same roster survives a bracket
+resize or reset.
+
 `state.bracket` is `{ size, teams, picks }`: `teams` is a flat array (one
-entry per round-0 slot) of `{ name, color, logo }`; `picks[round][match]` is
-`'A'`/`'B'` once that matchup's winner has been chosen. `public/shared/
-bracket-utils.js` derives the full round-by-round view — `computeBracketRounds`
-walks forward from `teams`, resolving each round's matches and carrying the
-winning team's whole `{name,color,logo}` object into the next round, so a
-later round always knows the original entrant's identity, not just its name.
-That file has no DOM dependency and is loaded two ways: as a browser
-`<script>` (bracket maker, bracket overlay) and via `require()` from
+entry per round-0 slot) of `{ name, color, secondaryColor, logo, rosterId }`
+— a **snapshot** of a roster team's data at the moment it was assigned, plus
+`rosterId` pointing back at which roster entry it came from. `picks[round][match]`
+is `'A'`/`'B'` once that matchup's winner has been chosen.
+
+Assigning a slot (`bracketAssignTeam { index, teamId }`) copies the roster
+team's current name/colors/logo into that slot and records its id — editing
+the roster team later does *not* retroactively update slots that already
+copied it; re-select it to pull the update in. `bracket.js` (the maker)
+builds each round-0 slot's `<select>` by excluding any roster id that's
+already the `rosterId` of a *different* slot, so a team can only occupy one
+slot in the bracket at a time; removing a team from the roster
+(`rosterRemoveTeam`) resets any slot still pointing at that id back to a
+blank default rather than leaving a dangling reference.
+
+`public/shared/bracket-utils.js` derives the full round-by-round view —
+`computeBracketRounds` walks forward from `teams`, resolving each round's
+matches and carrying the winning team's whole snapshot object into the next
+round, so a later round always knows the original entrant's identity, not
+just its name. That file has no DOM dependency and is loaded two ways: as a
+browser `<script>` (bracket maker, bracket overlay) and via `require()` from
 `server.js` (so `startMatchFromBracket` can resolve "who's actually in this
 matchup" using the exact same logic, instead of a second implementation
 drifting out of sync with the client's).
@@ -233,6 +258,6 @@ Picking a winner (`bracketPickWinner`) clears every pick in later rounds —
 otherwise changing an earlier result could leave a later round pointing at a
 team that's no longer actually there. `startMatchFromBracket { round, match }`
 looks up that matchup via `computeBracketRounds` and, if both sides are
-resolved, overwrites `state.teamA`/`state.teamB` with their name/color/logo
+resolved, overwrites `state.teamA`/`state.teamB` with their name/colors/logo
 and resets score/clock/penalties — it's the bridge between "who's playing
 next in the tournament" and "what the scoreboard overlay currently shows."

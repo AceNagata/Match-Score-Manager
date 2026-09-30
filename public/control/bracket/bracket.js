@@ -5,6 +5,7 @@ document.getElementById('overlay-url').textContent = `${location.origin}/overlay
 const SIZES = [4, 8, 16];
 
 let latestBracket = null;
+let latestRoster = [];
 
 function getToken() {
   return localStorage.getItem('controlToken') || '';
@@ -51,13 +52,101 @@ function esc(value) {
     .replace(/"/g, '&quot;');
 }
 
-async function handleLogoUpload(input, index) {
+async function uploadLogoTo(input, onDataUrl) {
   const file = input.files[0];
   if (!file) return;
   const dataUrl = await resizeImageFile(file);
-  send({ type: 'bracketSetTeamLogo', index, value: dataUrl });
+  onDataUrl(dataUrl);
   input.value = '';
 }
+
+/* ---------------- Team roster ---------------- */
+
+function renderRoster(roster) {
+  const container = document.getElementById('roster-list');
+  container.innerHTML = '';
+  roster.forEach((team) => container.appendChild(renderRosterCard(team)));
+}
+
+function renderRosterCard(team) {
+  const card = document.createElement('div');
+  card.className = 'roster-card';
+
+  const logoLabel = document.createElement('label');
+  logoLabel.className = 'roster-logo-btn';
+  logoLabel.title = 'Upload flag/logo';
+  if (team.logo) {
+    const img = document.createElement('img');
+    img.src = team.logo;
+    img.className = 'roster-logo-preview';
+    logoLabel.appendChild(img);
+  } else {
+    logoLabel.textContent = '➕';
+  }
+  const logoInput = document.createElement('input');
+  logoInput.type = 'file';
+  logoInput.accept = 'image/*';
+  logoInput.hidden = true;
+  logoInput.addEventListener('change', (e) =>
+    uploadLogoTo(e.target, (value) => send({ type: 'rosterSetLogo', id: team.id, value }))
+  );
+  logoLabel.appendChild(logoInput);
+  card.appendChild(logoLabel);
+
+  const nameInput = document.createElement('input');
+  nameInput.type = 'text';
+  nameInput.maxLength = 24;
+  nameInput.value = team.name;
+  nameInput.placeholder = 'Team name';
+  nameInput.addEventListener('input', (e) => {
+    debounceSend(`roster-name-${team.id}`, 200, { type: 'rosterSetName', id: team.id, value: e.target.value });
+  });
+  card.appendChild(nameInput);
+
+  const colorInput = document.createElement('input');
+  colorInput.type = 'color';
+  colorInput.className = 'bracket-color-input';
+  colorInput.value = team.color || '#64748b';
+  colorInput.title = 'Primary color';
+  colorInput.addEventListener('input', (e) => {
+    debounceSend(`roster-color-${team.id}`, 100, { type: 'rosterSetColor', id: team.id, value: e.target.value });
+  });
+  card.appendChild(colorInput);
+
+  const color2Input = document.createElement('input');
+  color2Input.type = 'color';
+  color2Input.className = 'bracket-color-input';
+  color2Input.value = team.secondaryColor || '#ffffff';
+  color2Input.title = 'Secondary color';
+  color2Input.addEventListener('input', (e) => {
+    debounceSend(`roster-color2-${team.id}`, 100, { type: 'rosterSetSecondaryColor', id: team.id, value: e.target.value });
+  });
+  card.appendChild(color2Input);
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'roster-delete-btn';
+  deleteBtn.textContent = '✕';
+  deleteBtn.title = 'Remove team';
+  deleteBtn.addEventListener('click', () => {
+    if (confirm(`Remove "${team.name}" from the roster? This also clears it from any bracket slot using it.`)) {
+      send({ type: 'rosterRemoveTeam', id: team.id });
+    }
+  });
+  card.appendChild(deleteBtn);
+
+  return card;
+}
+
+document.getElementById('roster-add').addEventListener('click', () => {
+  send({
+    type: 'rosterAddTeam',
+    name: `TEAM ${latestRoster.length + 1}`,
+    color: '#64748b',
+    secondaryColor: '#ffffff',
+  });
+});
+
+/* ---------------- Bracket ---------------- */
 
 function buildColumn(label, matchesWithIndex, round) {
   const col = document.createElement('div');
@@ -153,50 +242,44 @@ function renderSide(match, round, matchIndex, side) {
   row.className = 'bracket-side';
   if (match.winner === side) row.classList.add('winner');
 
+  if (team && team.logo) {
+    const img = document.createElement('img');
+    img.src = team.logo;
+    img.className = 'bracket-side-logo';
+    row.appendChild(img);
+  }
+
   if (round === 0) {
     const index = matchIndex * 2 + (side === 'A' ? 0 : 1);
 
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.maxLength = 24;
-    input.value = team ? team.name : '';
-    input.placeholder = `Team ${index + 1}`;
-    input.addEventListener('input', (e) => {
-      debounceSend(`name-${index}`, 200, { type: 'bracketSetTeamName', index, value: e.target.value });
-    });
-    row.appendChild(input);
+    const select = document.createElement('select');
+    select.className = 'bracket-team-select';
 
-    const colorInput = document.createElement('input');
-    colorInput.type = 'color';
-    colorInput.className = 'bracket-color-input';
-    colorInput.value = (team && team.color) || '#64748b';
-    colorInput.title = 'Primary color';
-    colorInput.addEventListener('input', (e) => {
-      debounceSend(`color-${index}`, 100, { type: 'bracketSetTeamColor', index, value: e.target.value });
-    });
-    row.appendChild(colorInput);
+    const noneOpt = document.createElement('option');
+    noneOpt.value = '';
+    noneOpt.textContent = '— Select team —';
+    select.appendChild(noneOpt);
 
-    const color2Input = document.createElement('input');
-    color2Input.type = 'color';
-    color2Input.className = 'bracket-color-input';
-    color2Input.value = (team && team.secondaryColor) || '#ffffff';
-    color2Input.title = 'Secondary color';
-    color2Input.addEventListener('input', (e) => {
-      debounceSend(`color2-${index}`, 100, { type: 'bracketSetTeamSecondaryColor', index, value: e.target.value });
-    });
-    row.appendChild(color2Input);
+    const usedElsewhere = new Set(
+      latestBracket.teams
+        .map((slot, i) => (i !== index && slot.rosterId ? slot.rosterId : null))
+        .filter(Boolean)
+    );
 
-    const logoLabel = document.createElement('label');
-    logoLabel.className = 'bracket-logo-btn';
-    logoLabel.title = 'Upload logo';
-    logoLabel.textContent = team && team.logo ? '🖼' : '➕';
-    const logoInput = document.createElement('input');
-    logoInput.type = 'file';
-    logoInput.accept = 'image/*';
-    logoInput.hidden = true;
-    logoInput.addEventListener('change', (e) => handleLogoUpload(e.target, index));
-    logoLabel.appendChild(logoInput);
-    row.appendChild(logoLabel);
+    latestRoster.forEach((rosterTeam) => {
+      if (usedElsewhere.has(rosterTeam.id)) return;
+      const opt = document.createElement('option');
+      opt.value = rosterTeam.id;
+      opt.textContent = rosterTeam.name;
+      if (team && team.rosterId === rosterTeam.id) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    select.addEventListener('change', (e) => {
+      send({ type: 'bracketAssignTeam', index, teamId: e.target.value || null });
+    });
+
+    row.appendChild(select);
   } else {
     const label = document.createElement('span');
     label.className = 'bracket-name-label' + (team ? '' : ' tbd');
@@ -220,7 +303,9 @@ function renderSide(match, round, matchIndex, side) {
 
 socket.on('state', (state) => {
   latestBracket = state.bracket;
+  latestRoster = state.teamRoster || [];
   if (Date.now() < suppressRenderUntil) return;
+  renderRoster(latestRoster);
   renderBracket(state.bracket);
 });
 
@@ -233,7 +318,7 @@ SIZES.forEach((size) => {
 });
 
 document.getElementById('reset-bracket').addEventListener('click', () => {
-  if (confirm('Reset the bracket? This clears all team names and picks.')) {
+  if (confirm('Reset the bracket? This clears all slot assignments and picks (the roster is kept).')) {
     send({ type: 'bracketReset' });
   }
 });

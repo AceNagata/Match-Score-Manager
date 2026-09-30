@@ -87,7 +87,7 @@
   background: #14532d;
 }
 
-.bracket-side input[type='text'] {
+.bracket-team-select {
   flex: 1;
   min-width: 0;
   padding: 6px 8px;
@@ -97,6 +97,16 @@
   color: #f8fafc;
   font-family: inherit;
   font-size: 13px;
+}
+
+.bracket-side-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 3px;
+  background: #fff;
+  padding: 2px;
+  flex-shrink: 0;
 }
 
 .bracket-side .bracket-name-label {
@@ -142,23 +152,6 @@
   flex-shrink: 0;
 }
 
-.bracket-logo-btn {
-  width: 26px;
-  height: 26px;
-  border-radius: 5px;
-  background: #334155;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.bracket-logo-btn:hover {
-  background: #475569;
-}
-
 .bracket-start-btn {
   width: 100%;
   padding: 8px;
@@ -175,4 +168,77 @@
   background: #1e293b;
   color: #475569;
   cursor: default;
+}
+
+.hint {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.roster-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.roster-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.roster-card input[type='text'] {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 5px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.roster-logo-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.roster-logo-btn:hover {
+  background: #475569;
+}
+
+.roster-logo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #fff;
+}
+
+.roster-delete-btn {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  flex-shrink: 0;
+  font-size: 13px;
+  background: #7f1d1d;
+}
+
+.roster-delete-btn:hover {
+  background: #991b1b;
 }

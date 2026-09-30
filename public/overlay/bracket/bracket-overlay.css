@@ -137,14 +137,29 @@ html, body {
 .match-side {
   display: flex;
   align-items: center;
+  gap: 8px;
   padding: 13px 14px;
   font-size: 14px;
   font-weight: 600;
   color: #cbd5e1;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.match-side span {
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.match-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 3px;
+  background: #fff;
+  padding: 1px;
+  flex-shrink: 0;
 }
 
 .match-side:last-child {
