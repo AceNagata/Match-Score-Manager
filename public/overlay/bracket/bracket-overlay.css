@@ -87,7 +87,7 @@ html, body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 220px;
+  width: 165px;
   gap: 16px;
 }
 
@@ -107,7 +107,7 @@ html, body {
 .round-col {
   display: flex;
   flex-direction: column;
-  width: 220px;
+  width: 165px;
 }
 
 .round-col h3 {
@@ -138,7 +138,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 13px 14px;
+  padding: 22px 14px;
   font-size: 14px;
   font-weight: 600;
   color: #cbd5e1;
@@ -179,7 +179,7 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 220px;
+  width: 165px;
   text-align: center;
 }
 
