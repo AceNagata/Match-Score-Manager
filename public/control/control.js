@@ -2,7 +2,7 @@ const socket = io();
 
 document.getElementById('overlay-url').textContent = `${location.origin}/overlay/`;
 
-const STYLES = ['classic', 'banner', 'badges', 'flags', 'neon', 'champions'];
+const STYLES = ['flags', 'neon'];
 
 let latestState = null;
 let nameTimers = {};
@@ -86,8 +86,7 @@ function render(state) {
   document.getElementById('logo-a-clear').hidden = !state.teamA.logo;
   document.getElementById('logo-b-clear').hidden = !state.teamB.logo;
 
-  document.getElementById('comp-logo-label').textContent = state.competitionLogo ? 'Change logo' : 'Upload logo';
-  document.getElementById('comp-logo-clear').hidden = !state.competitionLogo;
+  document.getElementById('neon-color').value = state.neonColor || '#c6f135';
 
   document.getElementById('timer-display').textContent = formatClock(state.timer.seconds);
   document.getElementById('extra-value').textContent = state.timer.extra;
@@ -139,13 +138,10 @@ document.getElementById('logo-a').addEventListener('change', (e) =>
 document.getElementById('logo-b').addEventListener('change', (e) =>
   handleLogoUpload(e.target, (value) => send({ type: 'setLogo', team: 'teamB', value }))
 );
-document.getElementById('comp-logo').addEventListener('change', (e) =>
-  handleLogoUpload(e.target, (value) => send({ type: 'setCompetitionLogo', value }))
-);
-
 document.getElementById('logo-a-clear').addEventListener('click', () => send({ type: 'setLogo', team: 'teamA', value: null }));
 document.getElementById('logo-b-clear').addEventListener('click', () => send({ type: 'setLogo', team: 'teamB', value: null }));
-document.getElementById('comp-logo-clear').addEventListener('click', () => send({ type: 'setCompetitionLogo', value: null }));
+
+document.getElementById('neon-color').addEventListener('input', (e) => send({ type: 'setNeonColor', value: e.target.value }));
 
 document.getElementById('timer-start').addEventListener('click', () => send({ type: 'timerStart' }));
 document.getElementById('timer-pause').addEventListener('click', () => send({ type: 'timerPause' }));

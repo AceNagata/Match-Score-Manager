@@ -106,22 +106,14 @@
       <section class="card">
         <h2>Overlay Style</h2>
         <div class="style-options">
-          <button data-style="classic" id="style-classic">Classic</button>
-          <button data-style="banner" id="style-banner">Banner</button>
-          <button data-style="badges" id="style-badges">Badges</button>
           <button data-style="flags" id="style-flags">Flags / VS</button>
           <button data-style="neon" id="style-neon">Neon</button>
-          <button data-style="champions" id="style-champions">Champions</button>
         </div>
-        <div class="comp-logo-row">
-          <span>Competition logo (Champions style)</span>
-          <div class="row-inline">
-            <label class="logo-upload">
-              <input type="file" id="comp-logo" accept="image/*" hidden />
-              <span id="comp-logo-label">Upload logo</span>
-            </label>
-            <button id="comp-logo-clear" class="ghost" hidden>&times;</button>
-          </div>
+        <div class="row-inline neon-color-row">
+          <label class="color-field">
+            <input type="color" id="neon-color" />
+            <span>Neon accent color</span>
+          </label>
         </div>
       </section>
 

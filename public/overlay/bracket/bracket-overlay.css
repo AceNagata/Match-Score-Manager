@@ -31,27 +31,6 @@ html, body {
   --champion-text: #1c1305;
 }
 
-.bracket-board.style-classic {
-  --board-bg: rgba(11, 11, 11, 0.92);
-  --header-color: #ffffff;
-  --champion-bg: linear-gradient(135deg, #d1d5db, #ffffff);
-  --champion-text: #111111;
-}
-
-.bracket-board.style-banner {
-  --board-bg: rgba(15, 23, 42, 0.9);
-  --header-color: #93c5fd;
-  --champion-bg: linear-gradient(135deg, #1d4ed8, #dc2626);
-  --champion-text: #ffffff;
-}
-
-.bracket-board.style-badges {
-  --board-bg: rgba(30, 58, 138, 0.92);
-  --header-color: #ffffff;
-  --champion-bg: linear-gradient(135deg, #1e3a8a, #60a5fa);
-  --champion-text: #ffffff;
-}
-
 .bracket-board.style-flags {
   --board-bg: rgba(23, 24, 28, 0.92);
   --header-color: #ffffff;
@@ -66,13 +45,6 @@ html, body {
   --champion-text: #111111;
 }
 
-.bracket-board.style-champions {
-  --board-bg: rgba(10, 25, 89, 0.92);
-  --header-color: #ffffff;
-  --champion-bg: linear-gradient(135deg, #f97316, #22c55e);
-  --champion-text: #111111;
-}
-
 .bracket-board:empty {
   display: none;
 }
@@ -83,7 +55,7 @@ html, body {
 }
 
 .connector-line {
-  stroke: #ffffff;
+  stroke: var(--connector-color, #ffffff);
   stroke-width: 2;
   opacity: 0.85;
 }

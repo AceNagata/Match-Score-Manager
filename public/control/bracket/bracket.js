@@ -304,10 +304,15 @@ function renderSide(match, round, matchIndex, side) {
 socket.on('state', (state) => {
   latestBracket = state.bracket;
   latestRoster = state.teamRoster || [];
+  document.getElementById('connector-color').value = state.connectorColor || '#ffffff';
   if (Date.now() < suppressRenderUntil) return;
   renderRoster(latestRoster);
   renderBracket(state.bracket);
 });
+
+document.getElementById('connector-color').addEventListener('input', (e) =>
+  send({ type: 'setConnectorColor', value: e.target.value })
+);
 
 SIZES.forEach((size) => {
   document.getElementById(`size-${size}`).addEventListener('click', () => {

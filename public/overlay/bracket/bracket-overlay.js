@@ -30,6 +30,7 @@ function columnHtml(label, matches) {
 function render(state) {
   const bracket = state.bracket;
   board.className = `bracket-board style-${state.style}`;
+  board.style.setProperty('--connector-color', state.connectorColor || '#ffffff');
   const rounds = computeBracketRounds(bracket);
   const roundCount = rounds.length;
   const bracketRounds = rounds.slice(0, roundCount - 1);

@@ -193,16 +193,10 @@ button.ghost:hover {
   font-weight: 700;
 }
 
-.comp-logo-row {
-  margin-top: 18px;
-  padding-top: 16px;
+.neon-color-row {
+  margin-top: 16px;
+  padding-top: 14px;
   border-top: 1px solid #334155;
-  font-size: 13px;
-  color: #94a3b8;
-}
-
-.comp-logo-row .row-inline {
-  margin-top: 10px;
   margin-bottom: 0;
 }
 

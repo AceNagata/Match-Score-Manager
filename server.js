@@ -14,7 +14,7 @@ const io = new Server(server, { maxHttpBufferSize: 5e6 });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-const VALID_STYLES = ['classic', 'banner', 'badges', 'flags', 'neon', 'champions'];
+const VALID_STYLES = ['flags', 'neon'];
 const VALID_BRACKET_SIZES = [4, 8, 16];
 const DEFAULT_BRACKET_COLORS = [
   '#1d4ed8', '#dc2626', '#16a34a', '#d97706',
@@ -49,8 +49,9 @@ function createInitialState() {
       teamA: [null, null, null, null, null],
       teamB: [null, null, null, null, null],
     },
-    style: 'classic',
-    competitionLogo: null,
+    style: 'flags',
+    neonColor: '#c6f135',
+    connectorColor: '#ffffff',
     bracket: createInitialBracket(),
     teamRoster: [],
   };
@@ -102,8 +103,11 @@ function applyPatch(patch) {
     case 'setLogo':
       state[patch.team].logo = typeof patch.value === 'string' ? patch.value : null;
       break;
-    case 'setCompetitionLogo':
-      state.competitionLogo = typeof patch.value === 'string' ? patch.value : null;
+    case 'setNeonColor':
+      state.neonColor = patch.value;
+      break;
+    case 'setConnectorColor':
+      state.connectorColor = patch.value;
       break;
     case 'timerStart':
       startTimer();

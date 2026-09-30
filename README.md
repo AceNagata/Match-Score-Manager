@@ -7,7 +7,7 @@ Two pages are served:
 
 - **Control panel** (`/control/`) — edit team names/colors/logos, adjust the
   score, run the match clock (with an extra-time indicator), track a penalty
-  shootout, upload a competition logo, and switch between six overlay styles.
+  shootout, and switch between the two overlay styles.
 - **Overlay** (`/overlay/`) — a transparent-background page you add as a
   Browser Source in OBS. It updates live over WebSockets whenever something
   changes in the control panel, so it can run on the same machine or a
@@ -33,7 +33,7 @@ Two pages are served:
   Browser Source: earlier rounds fan out left and right, converging on the
   final in the center with the champion showcased beneath it once decided.
   Each team's flag/logo (if it has one) is shown before its name. Colors
-  follow whichever of the six overlay styles is currently selected, same as
+  follow whichever of the two overlay styles is currently selected, same as
   the clock/penalty scenes. It auto-scales and centers on both axes to fill
   as much of the Browser Source as it can without distortion, regardless of
   whether it's a 4, 8, or 16-team bracket — see "Bracket overlay scaling"
@@ -41,33 +41,39 @@ Two pages are served:
 
 ## Overlay styles
 
-Six styles ship out of the box, modeled on the reference designs in
-`References/`:
+Two styles ship, modeled on the reference designs in `References/`:
 
 | Style | Look |
 | --- | --- |
-| `classic` | White clock box + black score strip, white penalty card |
-| `banner` | Angled team-color banners around a white score block |
-| `badges` | Navy bar with team logos beside each name |
-| `flags` | Dark card with colored team blocks and a "VS" divider |
-| `neon` | Neon-green accent with a hexagon score separator |
-| `champions` | Navy bar, orange/green bracket separators, competition logo |
+| `flags` | Dark card with colored team blocks and a "-" divider between scores |
+| `neon` | Neon accent (color-customizable) with a hexagon score separator |
 
-Team logos and the competition logo are optional — upload an image per team
-(or a competition badge) from the control panel and it appears on every style
-that shows one (`badges`, `flags`, `champions`); styles that don't use logos
-simply ignore them. Uploaded images are resized client-side before they're
-sent over the socket, so there's no meaningful payload-size concern.
+Styles that used to ship (`classic`, `banner`, `badges`, `champions`,
+including the competition-logo upload that only `champions` used) were
+removed to keep the style list to just these two — see git history if any of
+that code is ever needed again.
 
-Each team also has a **primary and secondary color**. In `classic`/`badges`/
-`neon`/`champions` (styles that don't already use the team color as a
-background), both colors show as a small diagonal two-tone chip next to the
-team's name. In `banner`/`flags` (styles where the team color already fills
-a block), the secondary color shows as a stripe along the bottom of that
-block instead, so it reads as a two-tone flag rather than a redundant swatch.
-Bracket entrants (`/control/bracket/`) have the same primary/secondary
-fields, and both carry over automatically when you "Start This Match" from
-a bracket matchup.
+Team logos are optional — upload an image per team from the control panel
+and it appears on `flags`; `neon` doesn't use logos and simply ignores them.
+Uploaded images are resized client-side before they're sent over the socket,
+so there's no meaningful payload-size concern.
+
+Each team also has a **primary and secondary color**. In `neon` (which
+doesn't already use the team color as a background), both colors show as a
+small diagonal two-tone chip next to the team's name. In `flags` (where the
+team color already fills a block), the secondary color shows as a stripe
+along the bottom of that block instead, so it reads as a two-tone flag
+rather than a redundant swatch. Bracket entrants (`/control/bracket/`) have
+the same primary/secondary fields, and both carry over automatically when
+you "Start This Match" from a bracket matchup.
+
+`neon`'s accent color (the clock background, score digits, and hex
+separator — lime green, `#c6f135`, by default) is a control-panel color
+picker (`state.neonColor`), applied via the `--neon-color` CSS custom
+property set on `.board` in `overlay.js`'s `render()`. `overlay.css`'s
+neon rules reference `var(--neon-color, #c6f135)` instead of a hardcoded
+color, so picking a new color repaints every neon-styled element instantly
+without a page reload.
 
 ### Extra time
 
@@ -76,11 +82,10 @@ bar drops down beneath the *entire* scoreboard row (not just the clock),
 with the `+N` centered in it — like a drawer opening under the whole bug.
 It's one shared `.extra-badge` CSS rule (`position: absolute; top: 100%;
 left: 0; right: 0`) anchored to whichever row-level container is
-`position: relative`: `.row` for `classic`/`badges`/`neon`/`champions`,
-`.banner-wrap` for `banner`, `.flags-wrap` for `flags`. `banner` and `flags`
-needed a wrapper element because their own row has a `filter`/`overflow`
-that would otherwise clip anything positioned outside it — the badge lives
-one level up, alongside the row, instead of inside it.
+`position: relative`: `.row` for `neon`, `.flags-wrap` for `flags`. `flags`
+needed a wrapper element because its own row has an `overflow` that would
+otherwise clip anything positioned outside it — the badge lives one level
+up, alongside the row, instead of inside it.
 
 ## Setup
 
@@ -314,11 +319,16 @@ connecting into the center final box. Both work outward-in from whichever
 side is farther from the center, so the line always leaves from the box's
 inner edge.
 
-The lines are plain white (`.connector-line { stroke: #ffffff }`) and will
-look invisible in a plain browser tab, because the page background is
-`transparent` and a normal tab renders "transparent" as white — white
-lines on a white tab background disappear. That's expected and not a bug:
-in OBS, the browser source's background really is transparent, so the
-lines show up against whatever video is behind them. (Confirmed this by
-temporarily forcing a dark `body` background while testing locally — the
-lines were there the whole time.)
+The lines default to white but their color is a control-panel setting
+(`state.connectorColor`, picker on `/control/bracket/`), applied the same
+way as the neon accent color: `bracket-overlay.js`'s `render()` sets
+`--connector-color` on `#board`, and `.connector-line` in
+`bracket-overlay.css` reads `stroke: var(--connector-color, #ffffff)`.
+
+With the default white color, the lines will look invisible in a plain
+browser tab, because the page background is `transparent` and a normal tab
+renders "transparent" as white — white lines on a white tab background
+disappear. That's expected and not a bug: in OBS, the browser source's
+background really is transparent, so the lines show up against whatever
+video is behind them. (Confirmed this by temporarily forcing a dark `body`
+background while testing locally — the lines were there the whole time.)
