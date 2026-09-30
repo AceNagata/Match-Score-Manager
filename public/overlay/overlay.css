@@ -60,15 +60,6 @@ html, body {
   gap: 6px;
 }
 
-.team-chip {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  flex-shrink: 0;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35) inset;
-}
-
 .pen-dot {
   width: 24px;
   height: 24px;
@@ -242,18 +233,6 @@ html, body {
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
-.style-neon .clock {
-  position: relative;
-  background: var(--neon-color, #c6f135);
-  color: #111;
-  font-size: 26px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100px;
-}
-
 .style-neon .score-strip {
   background: #0f1729;
   color: #fff;
@@ -271,12 +250,14 @@ html, body {
   font-size: 26px;
 }
 
-.style-neon .hex {
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.style-neon .clock {
+  background: var(--neon-color, #c6f135);
+  color: #111;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 5px 16px;
+  border-radius: 4px;
+  letter-spacing: 1px;
 }
 
 .style-neon .penalties {
@@ -306,9 +287,12 @@ html, body {
 }
 
 .style-neon .pen-row .team-label {
-  width: 70px;
+  width: 90px;
   font-size: 13px;
   font-weight: 700;
   color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 

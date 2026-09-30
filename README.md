@@ -46,7 +46,7 @@ Two styles ship, modeled on the reference designs in `References/`:
 | Style | Look |
 | --- | --- |
 | `flags` | Dark card with colored team blocks and a "-" divider between scores |
-| `neon` | Neon accent (color-customizable) with a hexagon score separator |
+| `neon` | Neon accent (color-customizable), team flags/logos, clock centered between the scores |
 
 Styles that used to ship (`classic`, `banner`, `badges`, `champions`,
 including the competition-logo upload that only `champions` used) were
@@ -54,26 +54,28 @@ removed to keep the style list to just these two — see git history if any of
 that code is ever needed again.
 
 Team logos are optional — upload an image per team from the control panel
-and it appears on `flags`; `neon` doesn't use logos and simply ignores them.
+and it appears on both `flags` and `neon` (main row and penalty panel);
+teams with no logo just show their name, no broken image or placeholder box.
 Uploaded images are resized client-side before they're sent over the socket,
 so there's no meaningful payload-size concern.
 
-Each team also has a **primary and secondary color**. In `neon` (which
-doesn't already use the team color as a background), both colors show as a
-small diagonal two-tone chip next to the team's name. In `flags` (where the
-team color already fills a block), the secondary color shows as a stripe
-along the bottom of that block instead, so it reads as a two-tone flag
-rather than a redundant swatch. Bracket entrants (`/control/bracket/`) have
-the same primary/secondary fields, and both carry over automatically when
-you "Start This Match" from a bracket matchup.
+Each team also has a **primary and secondary color**, used for the diagonal
+two-tone stripe along the bottom of `flags`' team-color blocks. `neon`
+doesn't use team colors at all — it shows each team's flag/logo instead, the
+same identifier `flags` uses, just without a colored background block.
+Bracket entrants (`/control/bracket/`) have the same primary/secondary
+fields (used for `flags`), and carry over automatically when you "Start
+This Match" from a bracket matchup.
 
-`neon`'s accent color (the clock background, score digits, and hex
-separator — lime green, `#c6f135`, by default) is a control-panel color
-picker (`state.neonColor`), applied via the `--neon-color` CSS custom
-property set on `.board` in `overlay.js`'s `render()`. `overlay.css`'s
-neon rules reference `var(--neon-color, #c6f135)` instead of a hardcoded
-color, so picking a new color repaints every neon-styled element instantly
-without a page reload.
+`neon`'s accent color (the clock pill's background and the score digits —
+lime green, `#c6f135`, by default) is a control-panel color picker
+(`state.neonColor`), applied via the `--neon-color` CSS custom property set
+on `.board` in `overlay.js`'s `render()`. `overlay.css`'s neon rules
+reference `var(--neon-color, #c6f135)` instead of a hardcoded color, so
+picking a new color repaints every neon-styled element instantly without a
+page reload. The clock itself sits between the two score digits (where a
+hexagon icon used to be) rather than as a separate box beside the team
+names.
 
 ### Extra time
 
