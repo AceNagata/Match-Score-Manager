@@ -1,0 +1,217 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Oswald', 'Arial Narrow', Arial, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  min-height: 100vh;
+  padding: 28px 20px 60px;
+}
+
+.wrap {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+header h1 {
+  font-size: 26px;
+  letter-spacing: 1px;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+}
+
+header p {
+  margin: 0 0 24px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+header p code {
+  color: #fbbf24;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.card {
+  background: #1e293b;
+  border-radius: 10px;
+  padding: 18px 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.card h2 {
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 0 0 14px;
+}
+
+.card.full {
+  grid-column: 1 / -1;
+}
+
+.team-card input[type='text'] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 16px;
+  font-family: inherit;
+  margin-bottom: 12px;
+}
+
+.team-card input[type='color'] {
+  width: 44px;
+  height: 34px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+
+.score-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.score-value {
+  font-size: 40px;
+  font-weight: 700;
+  min-width: 56px;
+  text-align: center;
+}
+
+.btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  background: #334155;
+  color: #f8fafc;
+  padding: 10px 14px;
+  font-size: 15px;
+  transition: background 0.15s ease;
+}
+
+button:hover {
+  background: #475569;
+}
+
+button.primary {
+  background: #2563eb;
+}
+
+button.primary:hover {
+  background: #3b82f6;
+}
+
+button.danger {
+  background: #7f1d1d;
+}
+
+button.danger:hover {
+  background: #991b1b;
+}
+
+button.toggle.active {
+  background: #16a34a;
+}
+
+.score-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.timer-display {
+  font-size: 48px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 14px;
+  letter-spacing: 2px;
+}
+
+.timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.style-options {
+  display: flex;
+  gap: 10px;
+}
+
+.style-options button {
+  flex: 1;
+}
+
+.style-options button.active {
+  background: #2563eb;
+}
+
+.penalty-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.pen-slots {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.pen-slots .label {
+  width: 90px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.pen-slot {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: #334155;
+  color: #f8fafc;
+  font-weight: 700;
+  padding: 0;
+}
+
+.pen-slot.scored {
+  background: #16a34a;
+}
+
+.pen-slot.missed {
+  background: #dc2626;
+}
+
+footer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+footer button {
+  padding: 10px 24px;
+}

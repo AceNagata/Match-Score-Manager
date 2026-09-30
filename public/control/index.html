@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Match Score Manager — Control Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="control.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Match Score Manager</h1>
+      <p>Add <code id="overlay-url">/overlay/</code> as an OBS Browser Source (transparent background).</p>
+    </header>
+
+    <div class="grid">
+      <section class="card team-card">
+        <h2>Team 1</h2>
+        <input type="text" id="name-a" maxlength="24" />
+        <input type="color" id="color-a" />
+        <div class="score-row">
+          <div class="btn-group">
+            <button class="score-btn" data-team="teamA" data-delta="-1">-</button>
+            <button class="score-btn" data-team="teamA" data-delta="1">+</button>
+          </div>
+          <div class="score-value" id="score-a">0</div>
+        </div>
+      </section>
+
+      <section class="card team-card">
+        <h2>Team 2</h2>
+        <input type="text" id="name-b" maxlength="24" />
+        <input type="color" id="color-b" />
+        <div class="score-row">
+          <div class="btn-group">
+            <button class="score-btn" data-team="teamB" data-delta="-1">-</button>
+            <button class="score-btn" data-team="teamB" data-delta="1">+</button>
+          </div>
+          <div class="score-value" id="score-b">0</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Match Clock</h2>
+        <div class="timer-display" id="timer-display">00:00</div>
+        <div class="timer-controls">
+          <button id="timer-start" class="primary">Start</button>
+          <button id="timer-pause">Pause</button>
+          <button id="timer-reset">Reset</button>
+          <button id="timer-minus10">-10s</button>
+          <button id="timer-plus10">+10s</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Overlay Style</h2>
+        <div class="style-options">
+          <button data-style="classic" id="style-classic">Classic</button>
+          <button data-style="banner" id="style-banner">Banner</button>
+        </div>
+      </section>
+
+      <section class="card full">
+        <h2>Penalty Shootout</h2>
+        <div class="penalty-toggle-row">
+          <span>Show penalty panel on overlay</span>
+          <button id="penalties-toggle" class="toggle">Off</button>
+        </div>
+        <div class="pen-slots" id="pen-row-a"></div>
+        <div class="pen-slots" id="pen-row-b"></div>
+      </section>
+    </div>
+
+    <footer>
+      <button id="reset-match" class="danger">Reset Entire Match</button>
+    </footer>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="control.js"></script>
+</body>
+</html>
