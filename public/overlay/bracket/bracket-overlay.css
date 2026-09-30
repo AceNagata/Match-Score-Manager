@@ -21,7 +21,8 @@ html, body {
 .bracket-board {
   position: absolute;
   top: 40px;
-  left: 40px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: stretch;
   gap: 40px;
