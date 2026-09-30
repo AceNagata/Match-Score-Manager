@@ -157,8 +157,6 @@ html, body {
   height: 20px;
   object-fit: contain;
   border-radius: 3px;
-  background: #fff;
-  padding: 1px;
   flex-shrink: 0;
 }
 
