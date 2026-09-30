@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Match Score Manager — Bracket Maker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../control.css" />
+  <link rel="stylesheet" href="bracket.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Bracket Maker</h1>
+      <p>
+        Add <code id="overlay-url">/overlay/bracket/</code> as an OBS Browser Source.
+        &nbsp;·&nbsp;<a class="back-link" href="../">← Back to match control</a>
+      </p>
+      <div class="token-row">
+        <span>Access token</span>
+        <input type="password" id="access-token" placeholder="Paste your control token" autocomplete="off" />
+        <button id="token-save">Save</button>
+        <span id="token-status" class="token-status"></span>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Bracket Size</h2>
+      <div class="size-options">
+        <button data-size="4" id="size-4">4 Teams</button>
+        <button data-size="8" id="size-8">8 Teams</button>
+        <button data-size="16" id="size-16">16 Teams</button>
+      </div>
+    </section>
+
+    <div id="champion-banner" class="champion-banner" hidden></div>
+
+    <div id="bracket-rounds" class="bracket-rounds"></div>
+
+    <footer>
+      <button id="reset-bracket" class="danger">Reset Bracket</button>
+    </footer>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared/bracket-utils.js"></script>
+  <script src="/shared/image-utils.js"></script>
+  <script src="bracket.js"></script>
+</body>
+</html>

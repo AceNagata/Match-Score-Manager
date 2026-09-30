@@ -12,7 +12,10 @@
   <div class="wrap">
     <header>
       <h1>Match Score Manager</h1>
-      <p>Add <code id="overlay-url">/overlay/</code> as an OBS Browser Source (transparent background).</p>
+      <p>
+        Add <code id="overlay-url">/overlay/</code> as an OBS Browser Source (transparent background).
+        &nbsp;·&nbsp;<a class="back-link" href="bracket/">Bracket Maker →</a>
+      </p>
       <div class="token-row">
         <span>Access token</span>
         <input type="password" id="access-token" placeholder="Paste your control token" autocomplete="off" />
@@ -121,6 +124,7 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/shared/image-utils.js"></script>
   <script src="control.js"></script>
 </body>
 </html>

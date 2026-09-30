@@ -18,6 +18,18 @@ Two pages are served:
   them independently in OBS instead of moving the combined `/overlay/` as one
   block. All three (plus any future scene) render from the same live state,
   so they're always in sync with each other and with the control panel.
+- **Bracket Maker** (`/control/bracket/`) — build a 4/8/16-team single-
+  elimination bracket: name each entrant, optionally give them a color and
+  logo, advance winners round by round, and see the champion crowned. A
+  "▶ Start This Match" button on any matchup (once both sides are known)
+  loads that pairing's names/colors/logos straight into the main match
+  scoreboard — score, clock, and penalties all reset for the new match — so
+  you don't have to retype anything when a tournament match kicks off.
+- **Bracket overlay** (`/overlay/bracket/`) — the tournament bracket as a
+  Browser Source: earlier rounds fan out left and right, converging on the
+  final in the center with the champion showcased beneath it once decided.
+  Its colors follow whichever of the six overlay styles is currently
+  selected, same as the clock/penalty scenes.
 
 ## Overlay styles
 
@@ -178,3 +190,26 @@ State lives in memory only and resets when the server restarts — there's no
 database. That's a deliberate v1 boundary; if you need it to survive
 restarts, the natural place to add persistence is a JSON file write on every
 `broadcastState()` call, loaded back in on startup.
+
+### Bracket
+
+`state.bracket` is `{ size, teams, picks }`: `teams` is a flat array (one
+entry per round-0 slot) of `{ name, color, logo }`; `picks[round][match]` is
+`'A'`/`'B'` once that matchup's winner has been chosen. `public/shared/
+bracket-utils.js` derives the full round-by-round view — `computeBracketRounds`
+walks forward from `teams`, resolving each round's matches and carrying the
+winning team's whole `{name,color,logo}` object into the next round, so a
+later round always knows the original entrant's identity, not just its name.
+That file has no DOM dependency and is loaded two ways: as a browser
+`<script>` (bracket maker, bracket overlay) and via `require()` from
+`server.js` (so `startMatchFromBracket` can resolve "who's actually in this
+matchup" using the exact same logic, instead of a second implementation
+drifting out of sync with the client's).
+
+Picking a winner (`bracketPickWinner`) clears every pick in later rounds —
+otherwise changing an earlier result could leave a later round pointing at a
+team that's no longer actually there. `startMatchFromBracket { round, match }`
+looks up that matchup via `computeBracketRounds` and, if both sides are
+resolved, overwrites `state.teamA`/`state.teamB` with their name/color/logo
+and resets score/clock/penalties — it's the bridge between "who's playing
+next in the tournament" and "what the scoreboard overlay currently shows."

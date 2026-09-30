@@ -2,6 +2,7 @@ const path = require('path');
 const http = require('http');
 const express = require('express');
 const { Server } = require('socket.io');
+const { computeBracketRounds } = require('./public/shared/bracket-utils.js');
 
 const PORT = process.env.PORT || 4000;
 const CONTROL_TOKEN = process.env.CONTROL_TOKEN || null;
@@ -13,6 +14,23 @@ const io = new Server(server, { maxHttpBufferSize: 5e6 });
 app.use(express.static(path.join(__dirname, 'public')));
 
 const VALID_STYLES = ['classic', 'banner', 'badges', 'flags', 'neon', 'champions'];
+const VALID_BRACKET_SIZES = [4, 8, 16];
+const DEFAULT_BRACKET_COLORS = [
+  '#1d4ed8', '#dc2626', '#16a34a', '#d97706',
+  '#7c3aed', '#0891b2', '#db2777', '#65a30d',
+];
+
+function createInitialBracket(size = 8) {
+  return {
+    size,
+    teams: Array.from({ length: size }, (_, i) => ({
+      name: `TEAM ${i + 1}`,
+      color: DEFAULT_BRACKET_COLORS[i % DEFAULT_BRACKET_COLORS.length],
+      logo: null,
+    })),
+    picks: {},
+  };
+}
 
 function createInitialState() {
   return {
@@ -26,6 +44,7 @@ function createInitialState() {
     },
     style: 'classic',
     competitionLogo: null,
+    bracket: createInitialBracket(),
   };
 }
 
@@ -102,10 +121,76 @@ function applyPatch(patch) {
       slots[patch.index] = current === null ? true : current === true ? false : null;
       break;
     }
-    case 'resetMatch':
+    case 'resetMatch': {
       pauseTimer();
+      const bracket = state.bracket;
       state = createInitialState();
+      state.bracket = bracket;
       break;
+    }
+    case 'bracketSetSize':
+      if (VALID_BRACKET_SIZES.includes(patch.value)) {
+        state.bracket = createInitialBracket(patch.value);
+      }
+      break;
+    case 'bracketSetTeamName':
+      if (state.bracket.teams[patch.index]) {
+        state.bracket.teams[patch.index].name = String(patch.value).slice(0, 24);
+      }
+      break;
+    case 'bracketSetTeamColor':
+      if (state.bracket.teams[patch.index]) {
+        state.bracket.teams[patch.index].color = patch.value;
+      }
+      break;
+    case 'bracketSetTeamLogo':
+      if (state.bracket.teams[patch.index]) {
+        state.bracket.teams[patch.index].logo = typeof patch.value === 'string' ? patch.value : null;
+      }
+      break;
+    case 'bracketPickWinner': {
+      const { round, match, side } = patch;
+      if (!state.bracket.picks[round]) state.bracket.picks[round] = {};
+      if (side === 'A' || side === 'B') {
+        state.bracket.picks[round][match] = side;
+      } else {
+        delete state.bracket.picks[round][match];
+      }
+      const roundCount = Math.log2(state.bracket.size);
+      for (let r = round + 1; r < roundCount; r += 1) {
+        state.bracket.picks[r] = {};
+      }
+      break;
+    }
+    case 'bracketReset':
+      state.bracket = createInitialBracket(state.bracket.size);
+      break;
+    case 'startMatchFromBracket': {
+      const rounds = computeBracketRounds(state.bracket);
+      const match = rounds[patch.round] && rounds[patch.round][patch.match];
+      if (match && match.teamA && match.teamB) {
+        pauseTimer();
+        state.teamA = {
+          name: match.teamA.name,
+          score: 0,
+          color: match.teamA.color || '#1d4ed8',
+          logo: match.teamA.logo || null,
+        };
+        state.teamB = {
+          name: match.teamB.name,
+          score: 0,
+          color: match.teamB.color || '#dc2626',
+          logo: match.teamB.logo || null,
+        };
+        state.timer = { seconds: 0, running: false, extra: 0 };
+        state.penalties = {
+          active: false,
+          teamA: [null, null, null, null, null],
+          teamB: [null, null, null, null, null],
+        };
+      }
+      break;
+    }
     default:
       break;
   }

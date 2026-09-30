@@ -29,6 +29,15 @@ header p {
   font-size: 14px;
 }
 
+.back-link {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
 .token-row {
   display: flex;
   align-items: center;

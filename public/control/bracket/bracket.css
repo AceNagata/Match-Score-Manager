@@ -1,0 +1,167 @@
+.size-options {
+  display: flex;
+  gap: 10px;
+}
+
+.size-options button {
+  flex: 1;
+}
+
+.size-options button.active {
+  background: #2563eb;
+}
+
+.champion-banner {
+  margin: 0 0 20px;
+  padding: 16px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #b45309, #f59e0b);
+  color: #1c1305;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.bracket-rounds {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.bracket-round {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bracket-round h3 {
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+.bracket-round-matches {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 14px;
+}
+
+.bracket-match {
+  background: #1e293b;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.bracket-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #0f172a;
+}
+
+.bracket-side:last-child {
+  border-bottom: none;
+}
+
+.bracket-side.winner {
+  background: #14532d;
+}
+
+.bracket-side input[type='text'] {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: 5px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.bracket-side .bracket-name-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #f8fafc;
+}
+
+.bracket-side .bracket-name-label.tbd {
+  color: #64748b;
+  font-style: italic;
+}
+
+.bracket-pick-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.bracket-pick-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.bracket-pick-btn:disabled:hover {
+  background: #334155;
+}
+
+.bracket-color-input {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.bracket-logo-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  background: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.bracket-logo-btn:hover {
+  background: #475569;
+}
+
+.bracket-start-btn {
+  width: 100%;
+  padding: 8px;
+  font-size: 12px;
+  border-radius: 0;
+  background: #2563eb;
+}
+
+.bracket-start-btn:hover:not(:disabled) {
+  background: #3b82f6;
+}
+
+.bracket-start-btn:disabled {
+  background: #1e293b;
+  color: #475569;
+  cursor: default;
+}
