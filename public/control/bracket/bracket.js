@@ -98,6 +98,7 @@ function renderRosterCard(team) {
   nameInput.maxLength = 24;
   nameInput.value = team.name;
   nameInput.placeholder = 'Team name';
+  nameInput.dataset.focusKey = `roster-name-${team.id}`;
   nameInput.addEventListener('input', (e) => {
     debounceSend(`roster-name-${team.id}`, 200, { type: 'rosterSetName', id: team.id, value: e.target.value });
   });
@@ -108,6 +109,7 @@ function renderRosterCard(team) {
   colorInput.className = 'bracket-color-input';
   colorInput.value = team.color || '#64748b';
   colorInput.title = 'Primary color';
+  colorInput.dataset.focusKey = `roster-color-${team.id}`;
   colorInput.addEventListener('input', (e) => {
     debounceSend(`roster-color-${team.id}`, 100, { type: 'rosterSetColor', id: team.id, value: e.target.value });
   });
@@ -118,6 +120,7 @@ function renderRosterCard(team) {
   color2Input.className = 'bracket-color-input';
   color2Input.value = team.secondaryColor || '#ffffff';
   color2Input.title = 'Secondary color';
+  color2Input.dataset.focusKey = `roster-color2-${team.id}`;
   color2Input.addEventListener('input', (e) => {
     debounceSend(`roster-color2-${team.id}`, 100, { type: 'rosterSetSecondaryColor', id: team.id, value: e.target.value });
   });
@@ -254,6 +257,7 @@ function renderSide(match, round, matchIndex, side) {
 
     const select = document.createElement('select');
     select.className = 'bracket-team-select';
+    select.dataset.focusKey = `bracket-select-${index}`;
 
     const noneOpt = document.createElement('option');
     noneOpt.value = '';
@@ -301,13 +305,52 @@ function renderSide(match, round, matchIndex, side) {
   return row;
 }
 
+let lastRosterJSON = null;
+let lastBracketJSON = null;
+
+function withFocusPreserved(renderFn) {
+  const active = document.activeElement;
+  const focusKey = active && active.dataset ? active.dataset.focusKey : null;
+  const selStart = active && typeof active.selectionStart === 'number' ? active.selectionStart : null;
+  const selEnd = active && typeof active.selectionEnd === 'number' ? active.selectionEnd : null;
+
+  renderFn();
+
+  if (!focusKey) return;
+  const next = document.querySelector(`[data-focus-key="${focusKey}"]`);
+  if (!next) return;
+  next.focus();
+  if (selStart !== null && typeof next.setSelectionRange === 'function') {
+    try {
+      next.setSelectionRange(selStart, selEnd);
+    } catch (e) {
+      // Some input types (e.g. color) don't support text selection.
+    }
+  }
+}
+
 socket.on('state', (state) => {
   latestBracket = state.bracket;
   latestRoster = state.teamRoster || [];
   document.getElementById('connector-color').value = state.connectorColor || '#ffffff';
   if (Date.now() < suppressRenderUntil) return;
-  renderRoster(latestRoster);
-  renderBracket(state.bracket);
+
+  const rosterJSON = JSON.stringify(latestRoster);
+  const rosterChanged = rosterJSON !== lastRosterJSON;
+  if (rosterChanged) {
+    lastRosterJSON = rosterJSON;
+    withFocusPreserved(() => renderRoster(latestRoster));
+  }
+
+  const bracketJSON = JSON.stringify(latestBracket);
+  const bracketChanged = bracketJSON !== lastBracketJSON;
+  // The round-0 dropdowns' option list/labels come from the roster, not the
+  // bracket, so a roster-only change (e.g. renaming a team) still needs to
+  // refresh the bracket to keep those labels in sync.
+  if (rosterChanged || bracketChanged) {
+    lastBracketJSON = bracketJSON;
+    withFocusPreserved(() => renderBracket(latestBracket));
+  }
 });
 
 document.getElementById('connector-color').addEventListener('input', (e) =>
