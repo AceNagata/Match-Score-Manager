@@ -170,11 +170,21 @@ function renderSide(match, round, matchIndex, side) {
     colorInput.type = 'color';
     colorInput.className = 'bracket-color-input';
     colorInput.value = (team && team.color) || '#64748b';
-    colorInput.title = 'Team color';
+    colorInput.title = 'Primary color';
     colorInput.addEventListener('input', (e) => {
       debounceSend(`color-${index}`, 100, { type: 'bracketSetTeamColor', index, value: e.target.value });
     });
     row.appendChild(colorInput);
+
+    const color2Input = document.createElement('input');
+    color2Input.type = 'color';
+    color2Input.className = 'bracket-color-input';
+    color2Input.value = (team && team.secondaryColor) || '#ffffff';
+    color2Input.title = 'Secondary color';
+    color2Input.addEventListener('input', (e) => {
+      debounceSend(`color2-${index}`, 100, { type: 'bracketSetTeamSecondaryColor', index, value: e.target.value });
+    });
+    row.appendChild(color2Input);
 
     const logoLabel = document.createElement('label');
     logoLabel.className = 'bracket-logo-btn';

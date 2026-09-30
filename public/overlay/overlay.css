@@ -29,14 +29,19 @@ html, body {
 }
 
 .extra-badge {
-  font-size: 12px;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 4px;
+  font-size: 11px;
   font-weight: 700;
   background: #f59e0b;
   color: #111;
   border-radius: 3px;
-  padding: 1px 5px;
-  margin-left: 6px;
-  vertical-align: middle;
+  padding: 2px 8px;
+  white-space: nowrap;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.35);
 }
 
 .team-logo {
@@ -46,6 +51,21 @@ html, body {
   background: #fff;
   border-radius: 4px;
   padding: 2px;
+}
+
+.team-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.team-chip {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35) inset;
 }
 
 .pen-dot {
@@ -98,6 +118,7 @@ html, body {
 }
 
 .style-classic .clock {
+  position: relative;
   background: #ffffff;
   color: #111;
   font-size: 26px;
@@ -206,15 +227,17 @@ html, body {
 }
 
 .style-banner .clock-pill {
-  margin: 8px auto 0;
+  position: relative;
+  margin: 10px auto 0;
   width: fit-content;
   background: #0b0b0b;
   color: #fff;
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 700;
-  padding: 4px 22px;
-  border-radius: 3px;
+  padding: 6px 30px;
+  border-radius: 4px;
   text-align: center;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
 }
 
 .style-banner .penalties {
@@ -268,6 +291,7 @@ html, body {
 }
 
 .style-badges .clock {
+  position: relative;
   background: #fff;
   color: #111;
   width: 96px;
@@ -345,6 +369,7 @@ html, body {
 .style-flags .flags-row {
   display: flex;
   align-items: stretch;
+  width: 760px;
   height: 58px;
   border-radius: 4px;
   overflow: hidden;
@@ -352,6 +377,7 @@ html, body {
 }
 
 .style-flags .clock-chip {
+  position: relative;
   background: #17181c;
   color: #fff;
   width: 96px;
@@ -365,6 +391,7 @@ html, body {
 .style-flags .flags-main {
   display: flex;
   flex: 1;
+  min-width: 0;
 }
 
 .style-flags .flag-team {
@@ -376,7 +403,8 @@ html, body {
   font-weight: 700;
   color: #fff;
   text-transform: uppercase;
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
 .style-flags .flag-team.team-a {
@@ -385,6 +413,13 @@ html, body {
 
 .style-flags .flag-team.team-b {
   justify-content: flex-end;
+}
+
+.style-flags .flag-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .style-flags .flags-score {
@@ -457,6 +492,7 @@ html, body {
 }
 
 .style-neon .clock {
+  position: relative;
   background: #c6f135;
   color: #111;
   font-size: 26px;
@@ -534,6 +570,7 @@ html, body {
 }
 
 .style-champions .clock {
+  position: relative;
   background: #fff;
   color: #111;
   width: 108px;
@@ -608,4 +645,49 @@ html, body {
   font-size: 13px;
   font-weight: 700;
   color: #fff;
+}
+
+/* ================= Dedicated clock scene (/overlay/clock/) ================= */
+.clockscene {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.cs-team {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cs-name {
+  font-size: 26px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}
+
+.cs-score {
+  background: rgba(0, 0, 0, 0.78);
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  padding: 3px 14px;
+  border-radius: 5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.cs-clock {
+  position: relative;
+  background: #0b0b0b;
+  color: #fff;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 10px 30px;
+  border-radius: 6px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
 }

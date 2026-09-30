@@ -24,6 +24,18 @@ function logoImg(src, className) {
   return src ? `<img class="${className}" src="${src}" />` : '';
 }
 
+function teamChip(team) {
+  const primary = team.color || '#64748b';
+  const secondary = team.secondaryColor || '#ffffff';
+  return `<span class="team-chip" style="background:linear-gradient(135deg, ${primary} 50%, ${secondary} 50%)"></span>`;
+}
+
+function twoToneBg(team) {
+  const primary = team.color || '#64748b';
+  const secondary = team.secondaryColor || '#ffffff';
+  return `linear-gradient(180deg, ${primary} 0%, ${primary} 78%, ${secondary} 78%, ${secondary} 100%)`;
+}
+
 function penaltyRows(state, options = {}) {
   return ['teamA', 'teamB']
     .map((team) => {
@@ -60,9 +72,9 @@ const renderers = {
       <div class="row">
         <div class="clock">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
         <div class="score-strip">
-          <span>${esc(state.teamA.name)}</span>
+          <span class="team-name">${teamChip(state.teamA)}${esc(state.teamA.name)}</span>
           <span class="score">${state.teamA.score} - ${state.teamB.score}</span>
-          <span>${esc(state.teamB.name)}</span>
+          <span class="team-name">${esc(state.teamB.name)}${teamChip(state.teamB)}</span>
         </div>
       </div>
     `;
@@ -72,11 +84,11 @@ const renderers = {
   banner(state) {
     const main = `
       <div class="banner-row">
-        <div class="team-block team-a" style="background:${state.teamA.color}">
+        <div class="team-block team-a" style="background:${twoToneBg(state.teamA)}">
           ${logoImg(state.teamA.logo, 'team-logo')}<span>${esc(state.teamA.name)}</span>
         </div>
         <div class="score-block">${state.teamA.score} - ${state.teamB.score}</div>
-        <div class="team-block team-b" style="background:${state.teamB.color}">
+        <div class="team-block team-b" style="background:${twoToneBg(state.teamB)}">
           <span>${esc(state.teamB.name)}</span>${logoImg(state.teamB.logo, 'team-logo')}
         </div>
       </div>
@@ -90,9 +102,9 @@ const renderers = {
       <div class="row">
         <div class="clock">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
         <div class="score-strip">
-          <span class="team-side">${logoImg(state.teamA.logo, 'team-logo')}<span>${esc(state.teamA.name)}</span></span>
+          <span class="team-side">${logoImg(state.teamA.logo, 'team-logo')}${teamChip(state.teamA)}<span>${esc(state.teamA.name)}</span></span>
           <span class="score-box">${state.teamA.score} - ${state.teamB.score}</span>
-          <span class="team-side"><span>${esc(state.teamB.name)}</span>${logoImg(state.teamB.logo, 'team-logo')}</span>
+          <span class="team-side"><span>${esc(state.teamB.name)}</span>${teamChip(state.teamB)}${logoImg(state.teamB.logo, 'team-logo')}</span>
         </div>
       </div>
     `;
@@ -104,14 +116,14 @@ const renderers = {
       <div class="flags-row">
         <div class="clock-chip">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
         <div class="flags-main">
-          <div class="flag-team team-a" style="background:${state.teamA.color}">
-            <span>${esc(state.teamA.name)}</span>${logoImg(state.teamA.logo, 'flag-img')}
+          <div class="flag-team team-a" style="background:${twoToneBg(state.teamA)}">
+            <span class="flag-name">${esc(state.teamA.name)}</span>${logoImg(state.teamA.logo, 'flag-img')}
           </div>
           <div class="flags-score">
             <span>${state.teamA.score}</span><span class="vs">VS</span><span>${state.teamB.score}</span>
           </div>
-          <div class="flag-team team-b" style="background:${state.teamB.color}">
-            ${logoImg(state.teamB.logo, 'flag-img')}<span>${esc(state.teamB.name)}</span>
+          <div class="flag-team team-b" style="background:${twoToneBg(state.teamB)}">
+            ${logoImg(state.teamB.logo, 'flag-img')}<span class="flag-name">${esc(state.teamB.name)}</span>
           </div>
         </div>
       </div>
@@ -125,11 +137,11 @@ const renderers = {
       <div class="row">
         <div class="clock">${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
         <div class="score-strip">
-          <span>${esc(state.teamA.name)}</span>
+          <span class="team-name">${teamChip(state.teamA)}${esc(state.teamA.name)}</span>
           <span class="score">${state.teamA.score}</span>
           ${hex}
           <span class="score">${state.teamB.score}</span>
-          <span>${esc(state.teamB.name)}</span>
+          <span class="team-name">${esc(state.teamB.name)}${teamChip(state.teamB)}</span>
         </div>
       </div>
     `;
@@ -144,12 +156,12 @@ const renderers = {
       <div class="row">
         <div class="clock">${comp}${formatClock(state.timer.seconds)}${extraBadge(state.timer.extra)}</div>
         <div class="score-strip">
-          <span>${esc(state.teamA.name)}</span>
+          <span class="team-name">${teamChip(state.teamA)}${esc(state.teamA.name)}</span>
           <span class="bracket left">❯</span>
           <span>${state.teamA.score}</span>
           <span>${state.teamB.score}</span>
           <span class="bracket right">❮</span>
-          <span>${esc(state.teamB.name)}</span>
+          <span class="team-name">${esc(state.teamB.name)}${teamChip(state.teamB)}</span>
         </div>
       </div>
     `;
@@ -157,12 +169,34 @@ const renderers = {
   },
 };
 
+function clockSceneSide(team, score, align) {
+  const chip = teamChip(team);
+  const name = `<span class="cs-name" style="color:${team.color || '#fff'}">${esc(team.name)}</span>`;
+  const scoreEl = `<span class="cs-score">${score}</span>`;
+  return align === 'left'
+    ? `<div class="cs-team">${chip}${name}${scoreEl}</div>`
+    : `<div class="cs-team">${scoreEl}${name}${chip}</div>`;
+}
+
+function renderClockScene(state) {
+  return `
+    <div class="clockscene">
+      ${clockSceneSide(state.teamA, state.teamA.score, 'left')}
+      <div class="cs-clock">
+        ${formatClock(state.timer.seconds)}
+        ${extraBadge(state.timer.extra)}
+      </div>
+      ${clockSceneSide(state.teamB, state.teamB.score, 'right')}
+    </div>
+  `;
+}
+
 function render(state) {
   const renderer = renderers[state.style] || renderers.classic;
   const { main, penalty } = renderer(state);
   board.className = `board style-${state.style}`;
   if (MODE === 'clock') {
-    board.innerHTML = main;
+    board.innerHTML = renderClockScene(state);
   } else if (MODE === 'penalty') {
     board.innerHTML = penalty;
   } else {

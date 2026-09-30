@@ -76,6 +76,8 @@ function render(state) {
   }
   document.getElementById('color-a').value = state.teamA.color;
   document.getElementById('color-b').value = state.teamB.color;
+  document.getElementById('color2-a').value = state.teamA.secondaryColor || '#ffffff';
+  document.getElementById('color2-b').value = state.teamB.secondaryColor || '#ffffff';
   document.getElementById('score-a').textContent = state.teamA.score;
   document.getElementById('score-b').textContent = state.teamB.score;
 
@@ -120,6 +122,8 @@ document.getElementById('name-b').addEventListener('input', (e) => debounceName(
 
 document.getElementById('color-a').addEventListener('input', (e) => send({ type: 'setColor', team: 'teamA', value: e.target.value }));
 document.getElementById('color-b').addEventListener('input', (e) => send({ type: 'setColor', team: 'teamB', value: e.target.value }));
+document.getElementById('color2-a').addEventListener('input', (e) => send({ type: 'setSecondaryColor', team: 'teamA', value: e.target.value }));
+document.getElementById('color2-b').addEventListener('input', (e) => send({ type: 'setSecondaryColor', team: 'teamB', value: e.target.value }));
 
 async function handleLogoUpload(input, onResult) {
   const file = input.files[0];

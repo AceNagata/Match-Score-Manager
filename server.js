@@ -26,6 +26,7 @@ function createInitialBracket(size = 8) {
     teams: Array.from({ length: size }, (_, i) => ({
       name: `TEAM ${i + 1}`,
       color: DEFAULT_BRACKET_COLORS[i % DEFAULT_BRACKET_COLORS.length],
+      secondaryColor: '#ffffff',
       logo: null,
     })),
     picks: {},
@@ -34,8 +35,8 @@ function createInitialBracket(size = 8) {
 
 function createInitialState() {
   return {
-    teamA: { name: 'TEAM 1', score: 0, color: '#1d4ed8', logo: null },
-    teamB: { name: 'TEAM 2', score: 0, color: '#dc2626', logo: null },
+    teamA: { name: 'TEAM 1', score: 0, color: '#1d4ed8', secondaryColor: '#ffffff', logo: null },
+    teamB: { name: 'TEAM 2', score: 0, color: '#dc2626', secondaryColor: '#ffffff', logo: null },
     timer: { seconds: 0, running: false, extra: 0 },
     penalties: {
       active: false,
@@ -87,6 +88,9 @@ function applyPatch(patch) {
       break;
     case 'setColor':
       state[patch.team].color = patch.value;
+      break;
+    case 'setSecondaryColor':
+      state[patch.team].secondaryColor = patch.value;
       break;
     case 'setLogo':
       state[patch.team].logo = typeof patch.value === 'string' ? patch.value : null;
@@ -143,6 +147,11 @@ function applyPatch(patch) {
         state.bracket.teams[patch.index].color = patch.value;
       }
       break;
+    case 'bracketSetTeamSecondaryColor':
+      if (state.bracket.teams[patch.index]) {
+        state.bracket.teams[patch.index].secondaryColor = patch.value;
+      }
+      break;
     case 'bracketSetTeamLogo':
       if (state.bracket.teams[patch.index]) {
         state.bracket.teams[patch.index].logo = typeof patch.value === 'string' ? patch.value : null;
@@ -174,12 +183,14 @@ function applyPatch(patch) {
           name: match.teamA.name,
           score: 0,
           color: match.teamA.color || '#1d4ed8',
+          secondaryColor: match.teamA.secondaryColor || '#ffffff',
           logo: match.teamA.logo || null,
         };
         state.teamB = {
           name: match.teamB.name,
           score: 0,
           color: match.teamB.color || '#dc2626',
+          secondaryColor: match.teamB.secondaryColor || '#ffffff',
           logo: match.teamB.logo || null,
         };
         state.timer = { seconds: 0, running: false, extra: 0 };
