@@ -291,3 +291,34 @@ there's no paint between resetting and reapplying the transform), so
 checking every second guarantees the overlay is correctly fit within a
 second of *any* layout shift — web font swaps included — without needing to
 know in advance what caused it or exactly when it'll happen.
+
+### Bracket connector lines
+
+The lines joining sibling match boxes into the next round are an SVG overlay
+drawn by `drawConnectors()`, not a CSS border trick — the gap between columns
+varies with the browser's font metrics and the scale factor, so the only way
+to hit the actual box edges is to measure them. On every `fitAndCenter()`
+pass (so after every render, resize, and font-swap correction described
+above), it re-reads each match box's `getBoundingClientRect()` in the
+board's *natural*, unscaled coordinate space, deletes the previous
+`<svg class="connector-svg">`, and draws a fresh one as the last child of
+`#board` — appending it there means it's carried along by the same
+`transform: scale(...)` as everything else, so the lines always line up
+with the boxes regardless of bracket size.
+
+Two shapes get drawn: `connectMerge()` (two source boxes feeding one target
+— the classic "two stubs meet a vertical bar, then one line continues into
+the target" shape) for every round-to-round merge on each half, and
+`connectSimple()` (a single straight stub) for the last box on each half
+connecting into the center final box. Both work outward-in from whichever
+side is farther from the center, so the line always leaves from the box's
+inner edge.
+
+The lines are plain white (`.connector-line { stroke: #ffffff }`) and will
+look invisible in a plain browser tab, because the page background is
+`transparent` and a normal tab renders "transparent" as white — white
+lines on a white tab background disappear. That's expected and not a bug:
+in OBS, the browser source's background really is transparent, so the
+lines show up against whatever video is behind them. (Confirmed this by
+temporarily forcing a dark `body` background while testing locally — the
+lines were there the whole time.)

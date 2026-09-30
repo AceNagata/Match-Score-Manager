@@ -66,6 +66,96 @@ function render(state) {
   fitAndCenter();
 }
 
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function matchesOf(col) {
+  return Array.from(col.querySelectorAll(':scope > .round-matches > .match-box'));
+}
+
+function drawConnectors(boardRect) {
+  const old = board.querySelector('.connector-svg');
+  if (old) old.remove();
+
+  const leftHalf = board.children[0];
+  const centerCol = board.children[1];
+  const rightHalf = board.children[2];
+  if (!leftHalf || !centerCol || !rightHalf) return;
+
+  const leftCols = Array.from(leftHalf.querySelectorAll(':scope > .round-col'));
+  const rightCols = Array.from(rightHalf.querySelectorAll(':scope > .round-col'));
+  const finalBox = centerCol.querySelector('.match-box.final-box');
+  if (!leftCols.length || !rightCols.length || !finalBox) return;
+
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('class', 'connector-svg');
+  svg.setAttribute('width', boardRect.width);
+  svg.setAttribute('height', boardRect.height);
+  svg.style.position = 'absolute';
+  svg.style.top = '0';
+  svg.style.left = '0';
+  svg.style.pointerEvents = 'none';
+  svg.style.overflow = 'visible';
+
+  function localRect(el) {
+    const r = el.getBoundingClientRect();
+    return {
+      left: r.left - boardRect.left,
+      right: r.right - boardRect.left,
+      centerY: r.top - boardRect.top + r.height / 2,
+    };
+  }
+
+  function addLine(x1, y1, x2, y2) {
+    const line = document.createElementNS(SVG_NS, 'line');
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    line.setAttribute('class', 'connector-line');
+    svg.appendChild(line);
+  }
+
+  function connectMerge(sourceAEl, sourceBEl, targetEl) {
+    const a = localRect(sourceAEl);
+    const b = localRect(sourceBEl);
+    const t = localRect(targetEl);
+    const sourceLeftOfTarget = a.left < t.left;
+    const sourceEdgeX = sourceLeftOfTarget ? a.right : a.left;
+    const targetEdgeX = sourceLeftOfTarget ? t.left : t.right;
+    const midX = (sourceEdgeX + targetEdgeX) / 2;
+    addLine(sourceEdgeX, a.centerY, midX, a.centerY);
+    addLine(sourceEdgeX, b.centerY, midX, b.centerY);
+    addLine(midX, a.centerY, midX, b.centerY);
+    addLine(midX, t.centerY, targetEdgeX, t.centerY);
+  }
+
+  function connectSimple(sourceEl, targetEl) {
+    const s = localRect(sourceEl);
+    const t = localRect(targetEl);
+    const sourceLeftOfTarget = s.left < t.left;
+    const sourceEdgeX = sourceLeftOfTarget ? s.right : s.left;
+    const targetEdgeX = sourceLeftOfTarget ? t.left : t.right;
+    addLine(sourceEdgeX, s.centerY, targetEdgeX, s.centerY);
+  }
+
+  for (let i = 0; i < leftCols.length - 1; i += 1) {
+    const sources = matchesOf(leftCols[i]);
+    const targets = matchesOf(leftCols[i + 1]);
+    targets.forEach((target, m) => connectMerge(sources[2 * m], sources[2 * m + 1], target));
+  }
+
+  for (let i = rightCols.length - 1; i > 0; i -= 1) {
+    const sources = matchesOf(rightCols[i]);
+    const targets = matchesOf(rightCols[i - 1]);
+    targets.forEach((target, m) => connectMerge(sources[2 * m], sources[2 * m + 1], target));
+  }
+
+  matchesOf(leftCols[leftCols.length - 1]).forEach((m) => connectSimple(m, finalBox));
+  matchesOf(rightCols[0]).forEach((m) => connectSimple(m, finalBox));
+
+  board.appendChild(svg);
+}
+
 function fitAndCenter() {
   if (!board.innerHTML.trim()) return;
 
@@ -76,6 +166,8 @@ function fitAndCenter() {
   const naturalWidth = board.offsetWidth;
   const naturalHeight = board.offsetHeight;
   if (!naturalWidth || !naturalHeight) return;
+
+  drawConnectors(board.getBoundingClientRect());
 
   const margin = 0.94;
   const scale = Math.min(
