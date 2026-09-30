@@ -19,7 +19,14 @@
       <section class="card team-card">
         <h2>Team 1</h2>
         <input type="text" id="name-a" maxlength="24" />
-        <input type="color" id="color-a" />
+        <div class="row-inline">
+          <input type="color" id="color-a" />
+          <label class="logo-upload">
+            <input type="file" id="logo-a" accept="image/*" hidden />
+            <span id="logo-a-label">Upload logo</span>
+          </label>
+          <button id="logo-a-clear" class="ghost" hidden>&times;</button>
+        </div>
         <div class="score-row">
           <div class="btn-group">
             <button class="score-btn" data-team="teamA" data-delta="-1">-</button>
@@ -32,7 +39,14 @@
       <section class="card team-card">
         <h2>Team 2</h2>
         <input type="text" id="name-b" maxlength="24" />
-        <input type="color" id="color-b" />
+        <div class="row-inline">
+          <input type="color" id="color-b" />
+          <label class="logo-upload">
+            <input type="file" id="logo-b" accept="image/*" hidden />
+            <span id="logo-b-label">Upload logo</span>
+          </label>
+          <button id="logo-b-clear" class="ghost" hidden>&times;</button>
+        </div>
         <div class="score-row">
           <div class="btn-group">
             <button class="score-btn" data-team="teamB" data-delta="-1">-</button>
@@ -52,6 +66,14 @@
           <button id="timer-minus10">-10s</button>
           <button id="timer-plus10">+10s</button>
         </div>
+        <div class="extra-row">
+          <span>Extra time</span>
+          <div class="btn-group">
+            <button id="extra-minus">-</button>
+            <span class="extra-value" id="extra-value">0</span>
+            <button id="extra-plus">+</button>
+          </div>
+        </div>
       </section>
 
       <section class="card">
@@ -59,6 +81,20 @@
         <div class="style-options">
           <button data-style="classic" id="style-classic">Classic</button>
           <button data-style="banner" id="style-banner">Banner</button>
+          <button data-style="badges" id="style-badges">Badges</button>
+          <button data-style="flags" id="style-flags">Flags / VS</button>
+          <button data-style="neon" id="style-neon">Neon</button>
+          <button data-style="champions" id="style-champions">Champions</button>
+        </div>
+        <div class="comp-logo-row">
+          <span>Competition logo (Champions style)</span>
+          <div class="row-inline">
+            <label class="logo-upload">
+              <input type="file" id="comp-logo" accept="image/*" hidden />
+              <span id="comp-logo-label">Upload logo</span>
+            </label>
+            <button id="comp-logo-clear" class="ghost" hidden>&times;</button>
+          </div>
         </div>
       </section>
 

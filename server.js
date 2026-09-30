@@ -7,21 +7,24 @@ const PORT = process.env.PORT || 4000;
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, { maxHttpBufferSize: 5e6 });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+const VALID_STYLES = ['classic', 'banner', 'badges', 'flags', 'neon', 'champions'];
+
 function createInitialState() {
   return {
-    teamA: { name: 'TEAM 1', score: 0, color: '#1d4ed8' },
-    teamB: { name: 'TEAM 2', score: 0, color: '#dc2626' },
-    timer: { seconds: 0, running: false },
+    teamA: { name: 'TEAM 1', score: 0, color: '#1d4ed8', logo: null },
+    teamB: { name: 'TEAM 2', score: 0, color: '#dc2626', logo: null },
+    timer: { seconds: 0, running: false, extra: 0 },
     penalties: {
       active: false,
       teamA: [null, null, null, null, null],
       teamB: [null, null, null, null, null],
     },
     style: 'classic',
+    competitionLogo: null,
   };
 }
 
@@ -65,6 +68,12 @@ function applyPatch(patch) {
     case 'setColor':
       state[patch.team].color = patch.value;
       break;
+    case 'setLogo':
+      state[patch.team].logo = typeof patch.value === 'string' ? patch.value : null;
+      break;
+    case 'setCompetitionLogo':
+      state.competitionLogo = typeof patch.value === 'string' ? patch.value : null;
+      break;
     case 'timerStart':
       startTimer();
       break;
@@ -77,8 +86,11 @@ function applyPatch(patch) {
     case 'timerAdjust':
       state.timer.seconds = Math.max(0, state.timer.seconds + patch.delta);
       break;
+    case 'extraAdjust':
+      state.timer.extra = Math.max(0, Math.min(99, state.timer.extra + patch.delta));
+      break;
     case 'setStyle':
-      state.style = patch.value;
+      if (VALID_STYLES.includes(patch.value)) state.style = patch.value;
       break;
     case 'penaltiesToggle':
       state.penalties.active = Boolean(patch.value);

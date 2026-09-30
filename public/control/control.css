@@ -79,6 +79,76 @@ header p code {
   cursor: pointer;
 }
 
+.row-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.logo-upload span {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: #334155;
+  color: #f8fafc;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.logo-upload span:hover {
+  background: #475569;
+}
+
+button.ghost {
+  background: transparent;
+  color: #94a3b8;
+  font-size: 18px;
+  padding: 4px 10px;
+}
+
+button.ghost:hover {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.extra-row {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.extra-row .btn-group {
+  align-items: center;
+}
+
+.extra-row button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+}
+
+.extra-value {
+  min-width: 28px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.comp-logo-row {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #334155;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.comp-logo-row .row-inline {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
 .score-row {
   display: flex;
   align-items: center;
@@ -157,12 +227,9 @@ button.toggle.active {
 }
 
 .style-options {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
-}
-
-.style-options button {
-  flex: 1;
 }
 
 .style-options button.active {

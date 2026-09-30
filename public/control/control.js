@@ -2,6 +2,8 @@ const socket = io();
 
 document.getElementById('overlay-url').textContent = `${location.origin}/overlay/`;
 
+const STYLES = ['classic', 'banner', 'badges', 'flags', 'neon', 'champions'];
+
 let latestState = null;
 let nameTimers = {};
 
@@ -13,6 +15,28 @@ function formatClock(totalSeconds) {
   const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
   const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
   return `${m}:${s}`;
+}
+
+function resizeImageFile(file, maxSize = 160) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function renderPenaltySlots(container, team, slots) {
@@ -53,10 +77,20 @@ function render(state) {
   document.getElementById('score-a').textContent = state.teamA.score;
   document.getElementById('score-b').textContent = state.teamB.score;
 
-  document.getElementById('timer-display').textContent = formatClock(state.timer.seconds);
+  document.getElementById('logo-a-label').textContent = state.teamA.logo ? 'Change logo' : 'Upload logo';
+  document.getElementById('logo-b-label').textContent = state.teamB.logo ? 'Change logo' : 'Upload logo';
+  document.getElementById('logo-a-clear').hidden = !state.teamA.logo;
+  document.getElementById('logo-b-clear').hidden = !state.teamB.logo;
 
-  document.getElementById('style-classic').classList.toggle('active', state.style === 'classic');
-  document.getElementById('style-banner').classList.toggle('active', state.style === 'banner');
+  document.getElementById('comp-logo-label').textContent = state.competitionLogo ? 'Change logo' : 'Upload logo';
+  document.getElementById('comp-logo-clear').hidden = !state.competitionLogo;
+
+  document.getElementById('timer-display').textContent = formatClock(state.timer.seconds);
+  document.getElementById('extra-value').textContent = state.timer.extra;
+
+  STYLES.forEach((style) => {
+    document.getElementById(`style-${style}`).classList.toggle('active', state.style === style);
+  });
 
   const penToggle = document.getElementById('penalties-toggle');
   penToggle.textContent = state.penalties.active ? 'On' : 'Off';
@@ -85,21 +119,47 @@ document.getElementById('name-b').addEventListener('input', (e) => debounceName(
 document.getElementById('color-a').addEventListener('input', (e) => send({ type: 'setColor', team: 'teamA', value: e.target.value }));
 document.getElementById('color-b').addEventListener('input', (e) => send({ type: 'setColor', team: 'teamB', value: e.target.value }));
 
+async function handleLogoUpload(input, onResult) {
+  const file = input.files[0];
+  if (!file) return;
+  const dataUrl = await resizeImageFile(file);
+  onResult(dataUrl);
+  input.value = '';
+}
+
+document.getElementById('logo-a').addEventListener('change', (e) =>
+  handleLogoUpload(e.target, (value) => send({ type: 'setLogo', team: 'teamA', value }))
+);
+document.getElementById('logo-b').addEventListener('change', (e) =>
+  handleLogoUpload(e.target, (value) => send({ type: 'setLogo', team: 'teamB', value }))
+);
+document.getElementById('comp-logo').addEventListener('change', (e) =>
+  handleLogoUpload(e.target, (value) => send({ type: 'setCompetitionLogo', value }))
+);
+
+document.getElementById('logo-a-clear').addEventListener('click', () => send({ type: 'setLogo', team: 'teamA', value: null }));
+document.getElementById('logo-b-clear').addEventListener('click', () => send({ type: 'setLogo', team: 'teamB', value: null }));
+document.getElementById('comp-logo-clear').addEventListener('click', () => send({ type: 'setCompetitionLogo', value: null }));
+
 document.getElementById('timer-start').addEventListener('click', () => send({ type: 'timerStart' }));
 document.getElementById('timer-pause').addEventListener('click', () => send({ type: 'timerPause' }));
 document.getElementById('timer-reset').addEventListener('click', () => send({ type: 'timerReset' }));
 document.getElementById('timer-minus10').addEventListener('click', () => send({ type: 'timerAdjust', delta: -10 }));
 document.getElementById('timer-plus10').addEventListener('click', () => send({ type: 'timerAdjust', delta: 10 }));
 
-document.getElementById('style-classic').addEventListener('click', () => send({ type: 'setStyle', value: 'classic' }));
-document.getElementById('style-banner').addEventListener('click', () => send({ type: 'setStyle', value: 'banner' }));
+document.getElementById('extra-minus').addEventListener('click', () => send({ type: 'extraAdjust', delta: -1 }));
+document.getElementById('extra-plus').addEventListener('click', () => send({ type: 'extraAdjust', delta: 1 }));
+
+STYLES.forEach((style) => {
+  document.getElementById(`style-${style}`).addEventListener('click', () => send({ type: 'setStyle', value: style }));
+});
 
 document.getElementById('penalties-toggle').addEventListener('click', () => {
   send({ type: 'penaltiesToggle', value: !latestState.penalties.active });
 });
 
 document.getElementById('reset-match').addEventListener('click', () => {
-  if (confirm('Reset the entire match? This clears scores, timer, and penalties.')) {
+  if (confirm('Reset the entire match? This clears scores, timer, logos, and penalties.')) {
     send({ type: 'resetMatch' });
   }
 });

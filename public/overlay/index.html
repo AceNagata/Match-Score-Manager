@@ -10,35 +10,7 @@
 </head>
 <body>
   <div class="stage">
-    <div id="board-classic" class="board">
-      <div class="row">
-        <div class="clock" id="classic-clock">00:00</div>
-        <div class="score-strip">
-          <span id="classic-name-a">TEAM 1</span>
-          <span class="score"><span id="classic-score-a">0</span> - <span id="classic-score-b">0</span></span>
-          <span id="classic-name-b">TEAM 2</span>
-        </div>
-      </div>
-      <div class="penalties" id="classic-penalties">
-        <h4>PENALTIES</h4>
-        <div class="pen-row" id="classic-pen-a"></div>
-        <div class="pen-row" id="classic-pen-b"></div>
-      </div>
-    </div>
-
-    <div id="board-banner" class="board">
-      <div class="banner-row">
-        <div class="team-block team-a" id="banner-name-a">TEAM 1</div>
-        <div class="score-block"><span id="banner-score-a">0</span> - <span id="banner-score-b">0</span></div>
-        <div class="team-block team-b" id="banner-name-b">TEAM 2</div>
-      </div>
-      <div class="clock-pill" id="banner-clock">00:00</div>
-      <div class="penalties" id="banner-penalties">
-        <h4>PENALTIES</h4>
-        <div class="pen-row" id="banner-pen-a"></div>
-        <div class="pen-row" id="banner-pen-b"></div>
-      </div>
-    </div>
+    <div id="board" class="board"></div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
