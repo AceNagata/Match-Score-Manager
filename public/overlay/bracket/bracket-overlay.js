@@ -95,7 +95,11 @@ function fitAndCenter() {
 window.addEventListener('resize', fitAndCenter);
 
 if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(fitAndCenter);
+  document.fonts.ready.then(() => {
+    requestAnimationFrame(() => requestAnimationFrame(fitAndCenter));
+  });
 }
+
+setTimeout(fitAndCenter, 600);
 
 socket.on('state', render);
