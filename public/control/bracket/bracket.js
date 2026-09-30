@@ -59,6 +59,22 @@ async function handleLogoUpload(input, index) {
   input.value = '';
 }
 
+function buildColumn(label, matchesWithIndex, round) {
+  const col = document.createElement('div');
+  col.className = 'bracket-round';
+
+  const heading = document.createElement('h3');
+  heading.textContent = label;
+  col.appendChild(heading);
+
+  const list = document.createElement('div');
+  list.className = 'bracket-round-matches';
+  matchesWithIndex.forEach(({ match, index }) => list.appendChild(renderMatch(match, round, index)));
+  col.appendChild(list);
+
+  return col;
+}
+
 function renderBracket(bracket) {
   latestBracket = bracket;
 
@@ -68,27 +84,36 @@ function renderBracket(bracket) {
 
   const rounds = computeBracketRounds(bracket);
   const roundCount = rounds.length;
-  const container = document.getElementById('bracket-rounds');
-  container.innerHTML = '';
+  const bracketRounds = rounds.slice(0, roundCount - 1);
+  const finalMatches = rounds[roundCount - 1];
 
-  rounds.forEach((matches, r) => {
-    const col = document.createElement('div');
-    col.className = 'bracket-round';
+  const leftContainer = document.getElementById('bracket-left');
+  const rightContainer = document.getElementById('bracket-right');
+  const centerContainer = document.getElementById('bracket-center');
+  leftContainer.innerHTML = '';
+  rightContainer.innerHTML = '';
+  centerContainer.innerHTML = '';
 
-    const heading = document.createElement('h3');
-    heading.textContent = bracketRoundLabel(roundCount, r);
-    col.appendChild(heading);
-
-    const list = document.createElement('div');
-    list.className = 'bracket-round-matches';
-
-    matches.forEach((match, m) => {
-      list.appendChild(renderMatch(match, r, m));
-    });
-
-    col.appendChild(list);
-    container.appendChild(col);
+  bracketRounds.forEach((matches, r) => {
+    const half = matches.length / 2;
+    const leftMatches = matches.slice(0, half).map((match, i) => ({ match, index: i }));
+    leftContainer.appendChild(buildColumn(bracketRoundLabel(roundCount, r), leftMatches, r));
   });
+
+  for (let r = bracketRounds.length - 1; r >= 0; r -= 1) {
+    const matches = bracketRounds[r];
+    const half = matches.length / 2;
+    const rightMatches = matches.slice(half).map((match, i) => ({ match, index: half + i }));
+    rightContainer.appendChild(buildColumn(bracketRoundLabel(roundCount, r), rightMatches, r));
+  }
+
+  const finalHeading = document.createElement('h3');
+  finalHeading.textContent = bracketRoundLabel(roundCount, roundCount - 1);
+  centerContainer.appendChild(finalHeading);
+  const finalList = document.createElement('div');
+  finalList.className = 'bracket-round-matches';
+  finalMatches.forEach((match, m) => finalList.appendChild(renderMatch(match, roundCount - 1, m)));
+  centerContainer.appendChild(finalList);
 
   const championBanner = document.getElementById('champion-banner');
   const champion = bracketChampion(rounds);

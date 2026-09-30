@@ -25,9 +25,15 @@
 
 .bracket-rounds {
   display: flex;
-  gap: 20px;
+  align-items: stretch;
+  gap: 40px;
   overflow-x: auto;
   padding-bottom: 10px;
+}
+
+.bracket-half {
+  display: flex;
+  gap: 20px;
 }
 
 .bracket-round {
@@ -35,6 +41,11 @@
   min-width: 260px;
   display: flex;
   flex-direction: column;
+}
+
+.bracket-final-col {
+  flex: 0 0 260px;
+  justify-content: center;
 }
 
 .bracket-round h3 {
