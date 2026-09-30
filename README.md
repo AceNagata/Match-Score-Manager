@@ -276,8 +276,18 @@ isn't affected by a previous scale), computes a single uniform scale factor
 (`Math.min` of the width-fit and height-fit ratios, so it never distorts
 the aspect ratio or overflows either dimension), then sets `left`/`top`/
 `transform: scale(...)` so the scaled box is centered on both axes with a
-small margin from the edges. It re-runs on `window.resize` and once more
-after `document.fonts.ready` resolves, since the Oswald web font can still
-be using fallback metrics at the moment of the first render — without that
-second pass the vertical centering can be off by several pixels until the
-real font settles in.
+small margin from the edges.
+
+It's called after every render and on `window.resize`, but neither of those
+alone was reliable enough in practice: on a fresh page load, the Oswald web
+font can swap in (changing text metrics, and therefore the board's natural
+size) at a moment that doesn't line up with any single one-shot hook —
+`document.fonts.ready` resolving before the first render even has content,
+a slow long-polling handshake delaying that first render past a fixed
+timeout, etc. — chasing the exact race wasn't worth it. Instead, `fitAndCenter()`
+also runs on a `setInterval(..., 1000)` for the life of the page. It's cheap
+and idempotent (just a measure + three inline styles, no visible flash since
+there's no paint between resetting and reapplying the transform), so
+checking every second guarantees the overlay is correctly fit within a
+second of *any* layout shift — web font swaps included — without needing to
+know in advance what caused it or exactly when it'll happen.

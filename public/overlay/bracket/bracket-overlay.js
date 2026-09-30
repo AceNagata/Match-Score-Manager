@@ -94,12 +94,11 @@ function fitAndCenter() {
 
 window.addEventListener('resize', fitAndCenter);
 
-if (document.fonts && document.fonts.ready) {
-  document.fonts.ready.then(() => {
-    requestAnimationFrame(() => requestAnimationFrame(fitAndCenter));
-  });
-}
-
-setTimeout(fitAndCenter, 600);
+// Safety net: fitAndCenter() is cheap and idempotent, so re-running it on an
+// interval guarantees the board stays correctly fit/centered even if some
+// async layout shift (e.g. the Oswald web font swapping in after first
+// paint) happens at a moment none of the one-shot hooks (render, resize,
+// fonts.ready) happen to catch.
+setInterval(fitAndCenter, 1000);
 
 socket.on('state', render);
