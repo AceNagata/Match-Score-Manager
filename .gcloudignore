@@ -1,0 +1,7 @@
+.git
+.gitignore
+.firebase/
+node_modules/
+References/
+hosting/
+*.md

@@ -1,0 +1,14 @@
+{
+  "hosting": {
+    "public": "hosting",
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "match-score-manager",
+          "region": "us-central1"
+        }
+      }
+    ]
+  }
+}

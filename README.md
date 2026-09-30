@@ -45,10 +45,50 @@ Then open:
 - Control panel: `http://localhost:4000/control/`
 - Overlay: `http://localhost:4000/overlay/`
 
+## Live deployment
+
+The app is hosted on Firebase/Google Cloud:
+
+- **Hosting URL** (use this day-to-day): https://match-score-manager.web.app
+- **Control panel**: https://match-score-manager.web.app/control/
+- **Overlay**: https://match-score-manager.web.app/overlay/
+- **Direct Cloud Run URL** (same app, no Hosting proxy in front — use this if
+  you want a true WebSocket connection instead of Socket.IO's long-polling
+  fallback): https://match-score-manager-979888735377.us-central1.run.app
+
+Firebase Hosting can only serve static files on its own — it can't run a
+persistent Node/Socket.IO process. So the actual server runs on **Cloud Run**
+(project `match-score-manager`, region `us-central1`), and Firebase Hosting
+sits in front of it as a `"**"` rewrite (see `firebase.json`) purely for the
+`.web.app` domain and TLS. Firebase Hosting's proxy doesn't pass the
+WebSocket `Upgrade` through to Cloud Run, so Socket.IO automatically falls
+back to HTTP long-polling on the Hosting URL — updates still land in about a
+second, which is fine for this use case. Hitting the Cloud Run URL directly
+gets you a real WebSocket with no proxy in between, since Cloud Run supports
+WebSockets natively.
+
+### Redeploying
+
+```bash
+# after changing server.js / public/*
+gcloud run deploy match-score-manager --source . --region us-central1 \
+  --allow-unauthenticated --project match-score-manager
+
+# after changing firebase.json/hosting/ only
+firebase deploy --only hosting --project match-score-manager
+```
+
+Both commands need the `gcloud` and `firebase` CLIs authenticated against the
+Google account that owns the `match-score-manager` project. The project is on
+the pay-as-you-go **Blaze** plan (required for Cloud Run) — usage at this
+scale should stay within the free tier of both Cloud Run and Firebase
+Hosting, but it's not the free Spark plan.
+
 ## Adding the overlay to OBS
 
 1. In OBS, add a **Browser Source**.
-2. Set the URL to `http://localhost:4000/overlay/`.
+2. Set the URL to the overlay URL — the live one above, or
+   `http://localhost:4000/overlay/` when running locally.
 3. Set the width/height to match your canvas (e.g. 1920x1080).
 4. Leave "Shutdown source when not visible" unchecked so it keeps receiving
    live updates.
