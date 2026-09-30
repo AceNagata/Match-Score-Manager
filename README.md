@@ -12,14 +12,12 @@ Two pages are served:
   Browser Source in OBS. It updates live over WebSockets whenever something
   changes in the control panel, so it can run on the same machine or a
   separate one on the same network.
-- **Overlay scenes** (`/overlay/clock/`, `/overlay/penalty/`) — separate
-  Browser Sources you can position or scene-switch independently instead of
-  moving the combined `/overlay/` as one block. `/overlay/penalty/` reuses
-  whichever of the six styles is selected; `/overlay/clock/` has its own
-  dedicated layout (see "Clock scene" below) rather than following the six
-  styles, since it's meant to be a clean, standalone "who's playing, what's
-  the score, what's the clock" scene. All scenes render from the same live
-  state, so they're always in sync with each other and with the control panel.
+- **Overlay scenes** (`/overlay/clock/`, `/overlay/penalty/`) — the same
+  overlay split into just the clock/score/names, or just the penalty panel,
+  as separate Browser Sources. Useful if you want to position or scene-switch
+  them independently in OBS instead of moving the combined `/overlay/` as one
+  block. All three (plus any future scene) render from the same live state,
+  so they're always in sync with each other and with the control panel.
 - **Bracket Maker** (`/control/bracket/`) — build a 4/8/16-team single-
   elimination bracket: name each entrant, optionally give them a color and
   logo, advance winners round by round, and see the champion crowned. A
@@ -63,25 +61,15 @@ Bracket entrants (`/control/bracket/`) have the same primary/secondary
 fields, and both carry over automatically when you "Start This Match" from
 a bracket matchup.
 
-### Clock scene
-
-`/overlay/clock/` doesn't reuse the six match styles' layouts — it has one
-dedicated design: each team's name (colored by its primary color) and score
-sit on the outside, with the match clock in the middle actually separating
-them, rather than off to one side. This is deliberately different from the
-combined `/overlay/` (which shows whichever of the six styles is selected)
-since the clock scene is meant to be a clean, standalone "who's playing"
-display you can drop into any OBS layout.
-
 ### Extra time
 
 When extra time is set (`Extra time` +/- in the control panel), a small
-`+N` tab appears hanging directly beneath the clock — in every style's clock
+`+N` tab appears hanging directly beneath the clock in every style's clock
 element (`classic`/`badges`/`neon`/`champions`'s `.clock`, `banner`'s
-`.clock-pill`, `flags`'s `.clock-chip`) and in the dedicated clock scene.
-It's implemented as one shared `.extra-badge` CSS rule (`position: absolute;
-top: 100%`) anchored to whichever clock element is `position: relative` — no
-per-style JS is needed to place it correctly.
+`.clock-pill`, `flags`'s `.clock-chip`). It's implemented as one shared
+`.extra-badge` CSS rule (`position: absolute; top: 100%`) anchored to
+whichever clock element is `position: relative` — no per-style JS is needed
+to place it correctly.
 
 ## Setup
 

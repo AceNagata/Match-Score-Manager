@@ -169,34 +169,12 @@ const renderers = {
   },
 };
 
-function clockSceneSide(team, score, align) {
-  const chip = teamChip(team);
-  const name = `<span class="cs-name" style="color:${team.color || '#fff'}">${esc(team.name)}</span>`;
-  const scoreEl = `<span class="cs-score">${score}</span>`;
-  return align === 'left'
-    ? `<div class="cs-team">${chip}${name}${scoreEl}</div>`
-    : `<div class="cs-team">${scoreEl}${name}${chip}</div>`;
-}
-
-function renderClockScene(state) {
-  return `
-    <div class="clockscene">
-      ${clockSceneSide(state.teamA, state.teamA.score, 'left')}
-      <div class="cs-clock">
-        ${formatClock(state.timer.seconds)}
-        ${extraBadge(state.timer.extra)}
-      </div>
-      ${clockSceneSide(state.teamB, state.teamB.score, 'right')}
-    </div>
-  `;
-}
-
 function render(state) {
   const renderer = renderers[state.style] || renderers.classic;
   const { main, penalty } = renderer(state);
   board.className = `board style-${state.style}`;
   if (MODE === 'clock') {
-    board.innerHTML = renderClockScene(state);
+    board.innerHTML = main;
   } else if (MODE === 'penalty') {
     board.innerHTML = penalty;
   } else {
