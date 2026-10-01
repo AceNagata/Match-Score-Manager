@@ -214,6 +214,11 @@ html, body {
   gap: 6px;
 }
 
+.style-flags .pen-total {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
 .style-flags .pen-row .team-label {
   width: 96px;
   font-size: 13px;
@@ -284,6 +289,11 @@ html, body {
   align-items: center;
   padding: 6px 10px;
   gap: 6px;
+}
+
+.style-neon .pen-total {
+  color: var(--neon-color, #c6f135);
+  border-color: var(--neon-color, #c6f135);
 }
 
 .style-neon .pen-row .team-label {
