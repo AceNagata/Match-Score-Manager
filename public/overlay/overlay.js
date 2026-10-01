@@ -16,8 +16,8 @@ function formatClock(totalSeconds) {
   return `${m}:${s}`;
 }
 
-function extraBadge(extra) {
-  return extra > 0 ? `<span class="extra-badge">+${extra}</span>` : '';
+function extraBadge(timer) {
+  return timer.extraActive ? `<span class="extra-badge">+${timer.extra}</span>` : '';
 }
 
 function logoImg(src, className) {
@@ -77,7 +77,7 @@ const renderers = {
             </div>
           </div>
         </div>
-        ${extraBadge(state.timer.extra)}
+        ${extraBadge(state.timer)}
       </div>
     `;
     return { main, penalty: penaltyBlock(state, { withLogos: true }) };
@@ -93,7 +93,7 @@ const renderers = {
           <span class="score">${state.teamB.score}</span>
           <span class="team-name">${esc(state.teamB.name)}${logoImg(state.teamB.logo, 'team-logo')}</span>
         </div>
-        ${extraBadge(state.timer.extra)}
+        ${extraBadge(state.timer)}
       </div>
     `;
     return { main, penalty: penaltyBlock(state, { withLogos: true }) };

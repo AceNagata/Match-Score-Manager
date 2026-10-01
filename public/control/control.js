@@ -91,6 +91,10 @@ function render(state) {
   document.getElementById('timer-display').textContent = formatClock(state.timer.seconds);
   document.getElementById('extra-value').textContent = state.timer.extra;
 
+  const extraToggle = document.getElementById('extra-toggle');
+  extraToggle.textContent = state.timer.extraActive ? 'On' : 'Off';
+  extraToggle.classList.toggle('active', state.timer.extraActive);
+
   STYLES.forEach((style) => {
     document.getElementById(`style-${style}`).classList.toggle('active', state.style === style);
   });
@@ -151,6 +155,16 @@ document.getElementById('timer-plus10').addEventListener('click', () => send({ t
 
 document.getElementById('extra-minus').addEventListener('click', () => send({ type: 'extraAdjust', delta: -1 }));
 document.getElementById('extra-plus').addEventListener('click', () => send({ type: 'extraAdjust', delta: 1 }));
+
+document.getElementById('extra-toggle').addEventListener('click', () => {
+  send({ type: 'extraActiveToggle', value: !latestState.timer.extraActive });
+});
+
+document.getElementById('end-match').addEventListener('click', () => {
+  if (confirm('End the match? This clears both team names and resets the clock and extra time.')) {
+    send({ type: 'endMatch' });
+  }
+});
 
 STYLES.forEach((style) => {
   document.getElementById(`style-${style}`).addEventListener('click', () => send({ type: 'setStyle', value: style }));

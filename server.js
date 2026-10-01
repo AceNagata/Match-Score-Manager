@@ -43,7 +43,7 @@ function createInitialState() {
   return {
     teamA: { name: 'TEAM 1', score: 0, color: '#1d4ed8', secondaryColor: '#ffffff', logo: null },
     teamB: { name: 'TEAM 2', score: 0, color: '#dc2626', secondaryColor: '#ffffff', logo: null },
-    timer: { seconds: 0, running: false, extra: 0 },
+    timer: { seconds: 0, running: false, extra: 0, extraActive: false },
     penalties: {
       active: false,
       teamA: [null, null, null, null, null],
@@ -123,6 +123,16 @@ function applyPatch(patch) {
       break;
     case 'extraAdjust':
       state.timer.extra = Math.max(0, Math.min(99, state.timer.extra + patch.delta));
+      break;
+    case 'extraActiveToggle':
+      state.timer.extraActive = Boolean(patch.value);
+      break;
+    case 'endMatch':
+      resetTimer();
+      state.timer.extra = 0;
+      state.timer.extraActive = false;
+      state.teamA.name = '';
+      state.teamB.name = '';
       break;
     case 'setStyle':
       if (VALID_STYLES.includes(patch.value)) state.style = patch.value;
@@ -264,7 +274,7 @@ function applyPatch(patch) {
           secondaryColor: match.teamB.secondaryColor || '#ffffff',
           logo: match.teamB.logo || null,
         };
-        state.timer = { seconds: 0, running: false, extra: 0 };
+        state.timer = { seconds: 0, running: false, extra: 0, extraActive: false };
         state.penalties = {
           active: false,
           teamA: [null, null, null, null, null],

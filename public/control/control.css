@@ -200,6 +200,15 @@ button.ghost:hover {
   margin-bottom: 0;
 }
 
+.extra-toggle-row {
+  margin-top: 14px;
+}
+
+.end-match-btn {
+  width: 100%;
+  margin-top: 16px;
+}
+
 .score-row {
   display: flex;
   align-items: center;

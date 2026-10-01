@@ -79,15 +79,33 @@ names.
 
 ### Extra time
 
-When extra time is set (`Extra time` +/- in the control panel), a full-width
-bar drops down beneath the *entire* scoreboard row (not just the clock),
-with the `+N` centered in it — like a drawer opening under the whole bug.
-It's one shared `.extra-badge` CSS rule (`position: absolute; top: 100%;
-left: 0; right: 0`) anchored to whichever row-level container is
-`position: relative`: `.row` for `neon`, `.flags-wrap` for `flags`. `flags`
-needed a wrapper element because its own row has an `overflow` that would
-otherwise clip anything positioned outside it — the badge lives one level
-up, alongside the row, instead of inside it.
+Setting the `Extra time` +/- count in the control panel does **not** show
+anything on the overlay by itself — it only stages the number. A separate
+"Show on overlay" toggle (`state.timer.extraActive`, same on/off pattern as
+the penalty panel's "Show penalty panel on overlay") controls whether the
+badge is actually visible, so you can set the number ahead of time and
+reveal it on the overlay at whatever moment you choose, instead of it
+popping up the instant you adjust the count.
+
+When shown, a full-width bar drops down beneath the *entire* scoreboard row
+(not just the clock), with the `+N` centered in it — like a drawer opening
+under the whole bug. It's one shared `.extra-badge` CSS rule
+(`position: absolute; top: 100%; left: 0; right: 0`) anchored to whichever
+row-level container is `position: relative`: `.row` for `neon`,
+`.flags-wrap` for `flags`. `flags` needed a wrapper element because its own
+row has an `overflow` that would otherwise clip anything positioned outside
+it — the badge lives one level up, alongside the row, instead of inside it.
+
+### Ending a match
+
+The "End Match" button (Match Clock card) sends `endMatch`, which clears
+both team names (`state.teamA.name`/`teamB.name` become `''` — the overlay
+just shows no name, not a "TEAM 1" placeholder), stops and zeroes the
+clock, and clears extra time (both the count and the "Show on overlay"
+toggle). It deliberately leaves scores, colors, logos, and penalties alone
+— it's for clearing the identifying/time info between matches, not a full
+reset. For a complete wipe back to defaults, use "Reset Entire Match" in
+the footer instead.
 
 ## Setup
 
