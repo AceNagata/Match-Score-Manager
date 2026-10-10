@@ -6,6 +6,7 @@ const SIZES = [4, 8, 16];
 
 let latestBracket = null;
 let latestRoster = [];
+let latestLive = null;
 
 function getToken() {
   return localStorage.getItem('controlToken') || '';
@@ -220,6 +221,14 @@ function renderBracket(bracket) {
 function renderMatch(match, round, matchIndex) {
   const box = document.createElement('div');
   box.className = 'bracket-match';
+
+  if (latestLive && latestLive.round === round && latestLive.match === matchIndex) {
+    const badge = document.createElement('div');
+    badge.className = 'bracket-live-badge';
+    badge.textContent = '● Live on the scoreboard';
+    box.appendChild(badge);
+  }
+
   box.appendChild(renderSide(match, round, matchIndex, 'A'));
   box.appendChild(renderSide(match, round, matchIndex, 'B'));
 
@@ -291,6 +300,35 @@ function renderSide(match, round, matchIndex, side) {
     row.appendChild(label);
   }
 
+  if (match.teamA && match.teamB) {
+    const scoreInput = document.createElement('input');
+    scoreInput.type = 'number';
+    scoreInput.min = '0';
+    scoreInput.max = '99';
+    scoreInput.step = '1';
+    scoreInput.className = 'bracket-score-input';
+    scoreInput.placeholder = '-';
+    const score = side === 'A' ? match.scoreA : match.scoreB;
+    scoreInput.value = score === null ? '' : String(score);
+    scoreInput.title = `${team.name} goals`;
+    scoreInput.setAttribute('aria-label', `${team.name} goals`);
+    scoreInput.dataset.focusKey = `bracket-score-${round}-${matchIndex}-${side}`;
+    scoreInput.addEventListener('input', (e) => {
+      const raw = e.target.value.trim();
+      const n = Number(raw);
+      if (raw !== '' && !Number.isFinite(n)) return;
+      const value = raw === '' ? null : Math.max(0, Math.min(99, Math.trunc(n)));
+      debounceSend(`score-${round}-${matchIndex}-${side}`, 250, {
+        type: 'bracketSetScore',
+        round,
+        match: matchIndex,
+        side,
+        value,
+      });
+    });
+    row.appendChild(scoreInput);
+  }
+
   const pickBtn = document.createElement('button');
   pickBtn.className = 'bracket-pick-btn';
   pickBtn.textContent = '✓';
@@ -329,10 +367,114 @@ function withFocusPreserved(renderFn) {
   }
 }
 
+/* ---------------- Tournament (saving) ---------------- */
+
+const tournamentNameInput = document.getElementById('tournament-name');
+const persistStatusEl = document.getElementById('persist-status');
+const tournamentSelect = document.getElementById('tournament-select');
+const tournamentOpenBtn = document.getElementById('tournament-open');
+const tournamentDeleteBtn = document.getElementById('tournament-delete');
+const tournamentNewBtn = document.getElementById('tournament-new');
+
+let lastTournamentListKey = null;
+let latestPersist = { mode: 'file', status: 'idle' };
+
+function persistLabel(persist) {
+  const where = persist.mode === 'firestore' ? 'the database' : 'a file on this computer';
+  if (persist.mode === 'memory') {
+    return {
+      text: 'Not saving (storage is off)',
+      cls: 'error',
+      title: 'This server is running without storage, so nothing is kept after a restart.',
+    };
+  }
+  switch (persist.status) {
+    case 'saving':
+      return { text: 'Saving…', cls: '', title: `Saving to ${where}` };
+    case 'saved': {
+      const time = persist.savedAt
+        ? new Date(persist.savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+        : '';
+      return { text: `✓ Saved ${time}`.trim(), cls: 'ok', title: `Stored in ${where}` };
+    }
+    case 'error':
+      return {
+        text: `⚠ Not saved — ${persist.error || 'error'}`,
+        cls: 'error',
+        title: 'Your changes are kept in memory and the save is retried automatically.',
+      };
+    default:
+      return { text: 'Nothing to save yet', cls: '', title: `Changes are saved to ${where}` };
+  }
+}
+
+function updateTournamentButtons() {
+  const blocked = latestPersist.mode === 'memory';
+  const failing = latestPersist.status === 'error';
+  tournamentNewBtn.disabled = blocked || failing;
+  tournamentOpenBtn.disabled = blocked || failing || !tournamentSelect.value;
+  tournamentDeleteBtn.disabled = blocked || !tournamentSelect.value;
+  const why = failing ? "Fix the saving problem first so your current work isn't lost." : '';
+  tournamentNewBtn.title = why;
+  tournamentOpenBtn.title = why;
+}
+
+function renderTournament(state) {
+  const tournament = state.tournament || { id: '', name: '' };
+  latestPersist = state.persist || latestPersist;
+
+  if (document.activeElement !== tournamentNameInput) tournamentNameInput.value = tournament.name;
+
+  const label = persistLabel(latestPersist);
+  persistStatusEl.textContent = label.text;
+  persistStatusEl.className = `persist-status ${label.cls}`.trim();
+  persistStatusEl.title = label.title;
+
+  // Rebuilt only when the list actually changes: this runs on every broadcast (including the
+  // match clock's once-a-second tick) and rebuilding would close an open dropdown.
+  const saved = (state.tournaments || []).filter((t) => t.id !== tournament.id);
+  const key = JSON.stringify(saved);
+  if (key !== lastTournamentListKey) {
+    lastTournamentListKey = key;
+    const previous = tournamentSelect.value;
+    tournamentSelect.innerHTML = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = saved.length ? 'Open a saved tournament…' : 'No other saved tournaments';
+    tournamentSelect.appendChild(placeholder);
+    saved.forEach((t) => {
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.name;
+      tournamentSelect.appendChild(opt);
+    });
+    if (saved.some((t) => t.id === previous)) tournamentSelect.value = previous;
+  }
+  updateTournamentButtons();
+}
+
+tournamentNameInput.addEventListener('input', (e) => {
+  debounceSend('tournament-name', 400, { type: 'tournamentRename', value: e.target.value });
+});
+tournamentSelect.addEventListener('change', updateTournamentButtons);
+tournamentOpenBtn.addEventListener('click', () => {
+  if (tournamentSelect.value) send({ type: 'tournamentOpen', id: tournamentSelect.value });
+});
+tournamentNewBtn.addEventListener('click', () => send({ type: 'tournamentNew', name: '' }));
+tournamentDeleteBtn.addEventListener('click', () => {
+  const option = tournamentSelect.selectedOptions[0];
+  if (!option || !option.value) return;
+  if (confirm(`Delete "${option.textContent}" permanently? Its roster, bracket and scores can't be recovered.`)) {
+    send({ type: 'tournamentDelete', id: option.value });
+  }
+});
+
 socket.on('state', (state) => {
   latestBracket = state.bracket;
   latestRoster = state.teamRoster || [];
+  latestLive = state.liveMatch || null;
   document.getElementById('connector-color').value = state.connectorColor || '#ffffff';
+  renderTournament(state);
   if (Date.now() < suppressRenderUntil) return;
 
   const rosterJSON = JSON.stringify(latestRoster);
@@ -342,7 +484,8 @@ socket.on('state', (state) => {
     withFocusPreserved(() => renderRoster(latestRoster));
   }
 
-  const bracketJSON = JSON.stringify(latestBracket);
+  // The live-match badge isn't part of the bracket data, so it's tracked alongside it.
+  const bracketJSON = JSON.stringify([latestBracket, latestLive]);
   const bracketChanged = bracketJSON !== lastBracketJSON;
   // The round-0 dropdowns' option list/labels come from the roster, not the
   // bracket, so a roster-only change (e.g. renaming a team) still needs to

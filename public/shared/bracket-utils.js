@@ -9,7 +9,14 @@ function computeBracketRounds(bracket) {
       const teamA = currentTeams[2 * m] || null;
       const teamB = currentTeams[2 * m + 1] || null;
       const pick = (bracket.picks[r] && bracket.picks[r][m]) || null;
-      matches.push({ teamA, teamB, winner: pick });
+      const score = (bracket.scores && bracket.scores[r] && bracket.scores[r][m]) || null;
+      matches.push({
+        teamA,
+        teamB,
+        winner: pick,
+        scoreA: score && score.A != null ? score.A : null,
+        scoreB: score && score.B != null ? score.B : null,
+      });
     }
     rounds.push(matches);
     currentTeams = matches.map((match) => {

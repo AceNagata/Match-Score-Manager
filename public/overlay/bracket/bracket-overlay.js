@@ -14,7 +14,9 @@ function sideHtml(match, side) {
   if (!team) classes.push('tbd');
   if (match.winner === side) classes.push('winner');
   const logo = team && team.logo ? `<img class="match-logo" src="${team.logo}" />` : '';
-  return `<div class="${classes.join(' ')}">${logo}<span>${esc(team ? team.name : 'TBD')}</span></div>`;
+  const score = side === 'A' ? match.scoreA : match.scoreB;
+  const scoreHtml = team && score !== null && score !== undefined ? `<b class="match-score">${score}</b>` : '';
+  return `<div class="${classes.join(' ')}">${logo}<span>${esc(team ? team.name : 'TBD')}</span>${scoreHtml}</div>`;
 }
 
 function matchBoxHtml(match) {
@@ -205,6 +207,10 @@ if (new URLSearchParams(location.search).has('demo')) {
       size: 8,
       teams: names.map((name, i) => ({ name, color: colors[i], secondaryColor: '#ffffff', logo: null })),
       picks: { 0: { 0: 'A', 1: 'B', 2: 'A', 3: 'A' }, 1: { 0: 'A' } },
+      scores: {
+        0: { 0: { A: 3, B: 1 }, 1: { A: 0, B: 2 }, 2: { A: 2, B: 1 }, 3: { A: 4, B: 0 } },
+        1: { 0: { A: 2, B: 0 } },
+      },
     },
   });
 } else {

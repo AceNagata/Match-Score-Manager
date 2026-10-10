@@ -3,3 +3,6 @@ node_modules/
 npm-debug.log*
 .impeccable/
 .firebase/
+
+.data/
+match-state-snapshot-*.json

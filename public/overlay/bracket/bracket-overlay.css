@@ -124,10 +124,22 @@ html, body {
 }
 
 .match-side span {
+  flex: 1;
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.match-score {
+  flex-shrink: 0;
+  min-width: 22px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-weight: 700;
+  text-align: center;
 }
 
 .match-logo {

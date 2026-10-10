@@ -25,6 +25,26 @@
       </div>
     </header>
 
+    <section class="card tournament-card">
+      <h2>Tournament</h2>
+      <div class="tournament-name-row">
+        <input type="text" id="tournament-name" maxlength="60" placeholder="Tournament name" aria-label="Tournament name" />
+        <span id="persist-status" class="persist-status" role="status"></span>
+      </div>
+      <div class="tournament-actions">
+        <select id="tournament-select" aria-label="Saved tournaments"></select>
+        <button id="tournament-open">Open</button>
+        <button id="tournament-delete" class="danger">Delete</button>
+        <button id="tournament-new" class="primary">+ New tournament</button>
+      </div>
+      <p class="hint">
+        The roster and bracket (with every match score) save automatically, so
+        they're still here after a restart. Use <b>Open</b> to switch to another
+        saved tournament, or <b>New</b> to start a fresh one &mdash; the current
+        one stays saved.
+      </p>
+    </section>
+
     <section class="card">
       <h2>Team Roster</h2>
       <p class="hint">

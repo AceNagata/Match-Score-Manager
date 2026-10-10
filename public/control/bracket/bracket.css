@@ -246,3 +246,97 @@
 .roster-delete-btn:hover {
   background: #991b1b;
 }
+
+.tournament-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tournament-name-row input[type='text'] {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.persist-status {
+  flex-shrink: 0;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.persist-status.ok {
+  color: #4ade80;
+}
+
+.persist-status.error {
+  color: #f87171;
+}
+
+.tournament-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.tournament-actions select {
+  flex: 1 1 200px;
+  min-width: 0;
+  padding: 9px 10px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.tournament-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.tournament-card .hint {
+  margin: 0;
+}
+
+.bracket-live-badge {
+  padding: 4px 10px;
+  background: #7f1d1d;
+  color: #fecaca;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.bracket-score-input {
+  width: 46px;
+  flex-shrink: 0;
+  padding: 5px 4px;
+  border-radius: 5px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.bracket-score-input::-webkit-inner-spin-button,
+.bracket-score-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

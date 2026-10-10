@@ -37,14 +37,20 @@ Two pages are served:
   a name into every slot. A team already placed in the bracket is excluded
   from every other slot's dropdown, so you can't accidentally put the same
   team in twice. Advance winners round by round and see the champion crowned.
+  Each matchup has a score box per team: type the result in, or start the
+  match from the bracket and let the scoreboard fill it in as goals go in.
   A "▶ Start This Match" button on any matchup (once both sides are known)
   loads that pairing's name/colors/logo straight into the main match
-  scoreboard — score, clock, and penalties all reset for the new match — so
-  you don't have to retype anything when a tournament match kicks off.
+  scoreboard — clock and penalties reset for the new match, and the score
+  picks up from the matchup's recorded score (0–0 the first time) — so you
+  don't have to retype anything when a tournament match kicks off.
+  A **Tournament** card at the very top saves everything — see "Saved
+  tournaments" below.
 - **Bracket overlay** (`/overlay/bracket/`) — the tournament bracket as a
   Browser Source: earlier rounds fan out left and right, converging on the
   final in the center with the champion showcased beneath it once decided.
-  Each team's flag/logo (if it has one) is shown before its name. Colors
+  Each team's flag/logo (if it has one) is shown before its name, and each
+  matchup that has a recorded score shows it beside the team names. Colors
   follow whichever of the two overlay styles is currently selected, same as
   the clock/penalty scenes. It auto-scales and centers on both axes to fill
   as much of the Browser Source as it can without distortion, regardless of
@@ -196,8 +202,11 @@ second, which is fine for this use case. Hitting the Cloud Run URL directly
 gets you a real WebSocket with no proxy in between, since Cloud Run supports
 WebSockets natively.
 
-**Important:** match state lives in one process's memory (`server.js`), not
-a database, so the Cloud Run service is pinned to `--max-instances=1`. If it
+**Important:** the live match state lives in one process's memory
+(`server.js`), and the saved-tournament writes assume a single writer, so the
+Cloud Run service is pinned to `--max-instances=1`. (Tournaments themselves
+are in Firestore and survive restarts — see "Saved tournaments" — but the
+scoreboard, clock and events are not.) If it
 were allowed to scale to multiple instances, the control panel and overlay
 could land on different instances with different state and silently drift
 out of sync (this happened during initial setup — the default max-instances
@@ -210,6 +219,7 @@ lets Cloud Run scale out during any burst of traffic). Always redeploy with
 # after changing server.js / public/*
 gcloud run deploy match-score-manager --source . --region us-central1 \
   --allow-unauthenticated --project match-score-manager --max-instances=1
+# (leave --set-env-vars off: the existing CONTROL_TOKEN carries over)
 
 # after changing firebase.json/hosting/ only
 firebase deploy --only hosting --project match-score-manager
@@ -296,10 +306,10 @@ means adding a new folder whose `index.html` sets `OVERLAY_MODE` and includes
 the same shared JS/CSS, plus an entry in the gallery's `OVERLAYS` list — no
 server changes needed either way.
 
-State lives in memory only and resets when the server restarts — there's no
-database. That's a deliberate v1 boundary; if you need it to survive
-restarts, the natural place to add persistence is a JSON file write on every
-`broadcastState()` call, loaded back in on startup.
+The *live match* (names, score, clock, penalties, events, squads) lives in
+memory only and resets when the server restarts. The *tournament* — team
+roster, bracket, and every match score — is saved to a database and comes
+back; see "Saved tournaments" below.
 
 ### Bracket
 
@@ -310,11 +320,14 @@ Team Roster section of the bracket maker (`rosterAddTeam`/`rosterSetName`/
 It's independent of any one bracket, so the same roster survives a bracket
 resize or reset.
 
-`state.bracket` is `{ size, teams, picks }`: `teams` is a flat array (one
+`state.bracket` is `{ size, teams, picks, scores }`: `teams` is a flat array (one
 entry per round-0 slot) of `{ name, color, secondaryColor, logo, rosterId }`
 — a **snapshot** of a roster team's data at the moment it was assigned, plus
 `rosterId` pointing back at which roster entry it came from. `picks[round][match]`
-is `'A'`/`'B'` once that matchup's winner has been chosen.
+is `'A'`/`'B'` once that matchup's winner has been chosen, and
+`scores[round][match]` is `{ A, B }` — the goals each side scored.
+`computeBracketRounds` folds both into each match it returns
+(`winner`, `scoreA`, `scoreB`), which is all the maker and overlay read.
 
 Assigning a slot (`bracketAssignTeam { index, teamId }`) copies the roster
 team's current name/colors/logo into that slot and records its id — editing
@@ -341,8 +354,82 @@ otherwise changing an earlier result could leave a later round pointing at a
 team that's no longer actually there. `startMatchFromBracket { round, match }`
 looks up that matchup via `computeBracketRounds` and, if both sides are
 resolved, overwrites `state.teamA`/`state.teamB` with their name/colors/logo
-and resets score/clock/penalties — it's the bridge between "who's playing
-next in the tournament" and "what the scoreboard overlay currently shows."
+and resets clock/penalties — it's the bridge between "who's playing next in
+the tournament" and "what the scoreboard overlay currently shows."
+
+**Scores follow the scoreboard.** Starting a match also sets
+`state.liveMatch = { round, match }`, and from then on `afterPatch()` copies
+the scoreboard's score into `bracket.scores` after *every* patch — so
+`incrementScore`, goal events and removed goal events all reach the bracket
+without each having to know about it. Typing a score for the live match in
+the maker (`bracketSetScore`) goes the other way and updates the
+scoreboard, so the two never disagree. "End Match" and "Reset Entire Match"
+unlink it; the recorded score stays. Starting a matchup that already has a
+score resumes from it instead of 0–0, which is how a match survives a
+server restart (the clock does not).
+
+The link is held as a *reference* to the two bracket team objects (`liveRefs`
+in `server.js`), not as slot numbers: if either side stops being the same
+team object — a slot was reassigned, an earlier winner changed, the bracket
+was reset, another tournament was opened — the link drops by itself. The same
+reasoning clears stale scores: a score only describes the two teams that
+played it, so reassigning a slot or changing a winner clears that matchup's
+score and the matchups it feeds into (`clearScoresFrom`), while leaving
+unrelated matchups alone.
+
+### Saved tournaments
+
+A *tournament* is the team roster plus the bracket (picks and scores) under a
+name — `state.tournament = { id, name }`. It is the one part of the state that
+is stored outside memory, so it survives restarts and redeploys. The live
+match is not saved.
+
+- **Auto-save.** After every patch, `afterPatch()` compares a signature of
+  `[name, roster, bracket]` with the previous one; if it changed, a write is
+  queued 800 ms later (so typing a name isn't a write per keystroke). A change
+  to anything else — a scoreboard-only goal, the clock — saves nothing. A
+  tournament nobody has edited yet isn't written at all.
+- **Resume.** On startup the server reads the "active" pointer, loads that
+  tournament and only then starts listening, so no client ever sees a blank
+  bracket flash up and then get replaced. `SIGTERM` flushes any pending write
+  first, so a deploy can't lose the last edit.
+- **Several tournaments.** The Tournament card at the top of the Bracket Maker
+  renames the open one, starts a new one (`tournamentNew`), opens another
+  saved one (`tournamentOpen`) or deletes one (`tournamentDelete`; the open
+  tournament can't be deleted). Opening or creating one first flushes the
+  current one, and refuses to proceed if that flush failed — unsaved work is
+  never silently discarded.
+- **Status.** `state.persist = { mode, status, savedAt, error }` drives the
+  "✓ Saved 1:42 AM" / "Saving…" / "⚠ Not saved — …" chip. A failing store never
+  stops the scoreboard: the server keeps running from memory, reports the
+  problem, and retries every 15 s; the next successful save includes
+  everything.
+
+Storage is chosen by `STORE` (`store.js` — all backends share one interface):
+
+| `STORE` | Where | Default when |
+| --- | --- | --- |
+| `firestore` | Cloud Firestore: collection `tournaments`, plus `settings/active` | running on Cloud Run (`K_SERVICE` is set) |
+| `file` | JSON files in `DATA_DIR` (default `./.data`, git-ignored) | everywhere else — local `npm start` |
+| `memory` | nothing saved; tournament switching is disabled | only when set explicitly |
+
+Notes: a tournament is one Firestore document (1 MiB limit), and logos are
+most of its size, so saves over ~900 KB are refused with a "too large" status —
+the logo uploader already downsizes images, and 16 teams fit with room to
+spare. Ids are validated before they touch a file path or document name.
+Firestore is touched only by the server (with the Cloud Run service account),
+never by browsers, so there are no Firestore security rules to maintain; every
+write still goes through `CONTROL_TOKEN`.
+
+One-time Firestore setup for a project (already done for `match-score-manager`):
+
+```bash
+gcloud services enable firestore.googleapis.com --project <project>
+gcloud firestore databases create --location=us-central1 --project <project>
+```
+
+The Cloud Run service account needs Firestore access (`roles/datastore.user`,
+or the project `roles/editor` it has by default).
 
 ### Bracket overlay scaling
 
