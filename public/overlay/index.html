@@ -2,18 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Match Score Manager — Overlay</title>
+  <title>Match Score Manager — Overlays</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="overlay.css" />
+  <link rel="stylesheet" href="gallery.css" />
 </head>
 <body>
-  <div class="stage">
-    <div id="board" class="board"></div>
+  <div class="wrap">
+    <header class="top">
+      <div>
+        <h1>Overlays</h1>
+        <p class="lede">
+          Each overlay is its own page. Add the ones you want as separate sources, at
+          <b>1920 × 1080</b> with a transparent background, and position or scene-switch them independently.
+        </p>
+      </div>
+      <a class="back-link" href="/control/">Control panel →</a>
+    </header>
+
+    <div class="toolbar">
+      <div class="seg" role="group" aria-label="Preview data">
+        <span class="seg-label">Preview</span>
+        <button data-preview="sample" class="active">Sample data</button>
+        <button data-preview="live">Live match</button>
+      </div>
+      <div class="seg" role="group" aria-label="Sample style" id="style-seg">
+        <span class="seg-label">Style</span>
+        <button data-style="flags" class="active">Flags</button>
+        <button data-style="neon">Neon</button>
+      </div>
+    </div>
+
+    <main class="gallery" id="gallery"></main>
+
+    <section class="howto">
+      <div>
+        <h2>OBS Studio</h2>
+        <ol>
+          <li>Sources → <b>+</b> → <b>Browser</b>, and name it after the overlay.</li>
+          <li>Paste the overlay's URL. Set Width <b>1920</b> and Height <b>1080</b>.</li>
+          <li>Leave "Shutdown source when not visible" <b>off</b> so it keeps receiving updates.</li>
+        </ol>
+      </div>
+      <div>
+        <h2>vMix</h2>
+        <ol>
+          <li><b>Add Input</b> → <b>Web Browser</b>, and paste the overlay's URL.</li>
+          <li>Set the resolution to <b>1920 × 1080</b> and turn on <b>Transparent</b> if it's offered.</li>
+          <li>Put it on an <b>Overlay channel</b> (1–4) to bring it on and off over your program.</li>
+        </ol>
+      </div>
+    </section>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="overlay.js"></script>
+  <script src="gallery.js"></script>
 </body>
 </html>

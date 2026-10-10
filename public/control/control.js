@@ -1,7 +1,5 @@
 const socket = io();
 
-document.getElementById('overlay-url').textContent = `${location.origin}/overlay/`;
-
 const STYLES = ['flags', 'neon'];
 
 let latestState = null;

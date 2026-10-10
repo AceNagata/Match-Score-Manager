@@ -8,16 +8,28 @@ Two pages are served:
 - **Control panel** (`/control/`) — edit team names/colors/logos, adjust the
   score, run the match clock (with an extra-time indicator), track a penalty
   shootout, and switch between the two overlay styles.
-- **Overlay** (`/overlay/`) — a transparent-background page you add as a
-  Browser Source in OBS. It updates live over WebSockets whenever something
-  changes in the control panel, so it can run on the same machine or a
-  separate one on the same network.
-- **Overlay scenes** (`/overlay/clock/`, `/overlay/penalty/`) — the same
-  overlay split into just the clock/score/names, or just the penalty panel,
-  as separate Browser Sources. Useful if you want to position or scene-switch
-  them independently in OBS instead of moving the combined `/overlay/` as one
-  block. All three (plus any future scene) render from the same live state,
-  so they're always in sync with each other and with the control panel.
+- **Overlay gallery** (`/overlay/`) — not an overlay itself: a page that
+  shows a scaled live preview of every overlay with its URL and Copy / Open
+  buttons, plus OBS and vMix setup steps. Previews default to sample data
+  (each overlay page accepts `?demo=1`, and `&style=neon`) so empty overlays
+  like the pop-ups still show something; switch to "Live match" to see the
+  real state.
+- **Overlays**, one page each, all transparent 1920×1080 pages you add as
+  separate Browser Sources (OBS) or Web Browser inputs (vMix). They update
+  live over WebSockets, so they can run on the same machine or another one
+  on the network, and always stay in sync with each other:
+
+  | URL | Shows |
+  | --- | --- |
+  | `/overlay/clock/` | Scoreboard: clock, names, score, extra-time bar |
+  | `/overlay/goal/` | Animated GOAL banner when a goal is logged |
+  | `/overlay/cards-subs/` | Card and substitution lower-thirds |
+  | `/overlay/event-list/` | Running list of match events (when switched on) |
+  | `/overlay/penalty/` | Penalty shootout panel (when switched on) |
+  | `/overlay/bracket/` | Tournament bracket |
+
+  There is deliberately no combined "everything" page: put each piece on its
+  own source so it can be positioned and scene-switched independently.
 - **Bracket Maker** (`/control/bracket/`) — build a 4/8/16-team single-
   elimination bracket. A **Team Roster** section at the top is where you
   create teams once — name, primary/secondary color, flag/logo — and each
@@ -107,6 +119,49 @@ toggle). It deliberately leaves scores, colors, logos, and penalties alone
 reset. For a complete wipe back to defaults, use "Reset Entire Match" in
 the footer instead.
 
+### Match events, squads and pop-ups
+
+The control panel has two more cards:
+
+- **Squads** — each team's players (shirt number + optional name). Add them
+  one at a time, or open "Paste a lineup" and paste one player per line
+  (`10 Name`, `10. Name`, `10 - Name`, or just `10`). Numbers are unique per
+  team; the list stays sorted by number.
+- **Match Events** — pick an event (Goal, Penalty goal, Own goal, Yellow card,
+  Red card, Substitution), pick the team, then tap the player's number. The
+  event is logged at the current clock minute (`minute` = whole minutes
+  played + 1, so 02:20 is `3'`), or at whatever you type in the Minute box
+  first (`45+2`). A substitution takes two taps: the player going off, then
+  the player coming on.
+
+What each event does:
+
+- Goals add 1 to the scoring team's score. An own goal is logged against the
+  player's own team and counts for the other side. Deleting a goal event from
+  the log takes the point back off.
+- A second yellow for the same player is logged as `secondYellow` and shown
+  as a yellow + red card.
+- Every new event pops up on the overlay: goals as a full-width animated
+  **GOAL** splash in the scoring team's colors with the scorer, minute and
+  the updated score; cards and substitutions as a lower-third in the bottom
+  left. Pop-ups hide themselves (goal 9s, card 7s, sub 8s — `POPUP_DURATION`
+  in `server.js`); "Hide pop-up now" clears one early, and "Show" on any
+  logged event replays it.
+- "Show event list on overlay" toggles a running list of the last 12 events
+  (top left).
+
+State: `state.teamA.squad` / `teamB.squad` (`{ id, number, name }`),
+`state.events` (`{ id, type, team, minute, seconds, player, playerOn?,
+scoreAfter? }`, with player data copied in so later squad edits don't change
+history), `state.popup` (`{ seq, eventId, kind }`, `seq` bumps on every show so
+the overlay only restarts the animation for a new pop-up, not on every
+clock tick) and `state.eventsListActive`. "Start This Match" from the
+bracket clears squads and events for the new pairing; "End Match" leaves
+them alone, like scores.
+
+Goals render only on `/overlay/goal/`, cards and subs only on
+`/overlay/cards-subs/`, and the list only on `/overlay/event-list/`.
+
 ## Setup
 
 ```bash
@@ -117,7 +172,7 @@ npm start
 Then open:
 
 - Control panel: `http://localhost:4000/control/`
-- Overlay: `http://localhost:4000/overlay/`
+- Overlay gallery (all overlay links): `http://localhost:4000/overlay/`
 
 ## Live deployment
 
@@ -125,7 +180,7 @@ The app is hosted on Firebase/Google Cloud:
 
 - **Hosting URL** (use this day-to-day): https://match-score-manager.web.app
 - **Control panel**: https://match-score-manager.web.app/control/
-- **Overlay**: https://match-score-manager.web.app/overlay/
+- **Overlay gallery**: https://match-score-manager.web.app/overlay/
 - **Direct Cloud Run URL** (same app, no Hosting proxy in front — use this if
   you want a true WebSocket connection instead of Socket.IO's long-polling
   fallback): https://match-score-manager-979888735377.us-central1.run.app
@@ -201,22 +256,19 @@ device/browser that uses it (old sessions won't be able to write until you
 do). Locally (`npm start`), `CONTROL_TOKEN` is unset by default, so local dev
 has no token gate — that's fine since it's bound to localhost only.
 
-## Adding the overlay to OBS
+## Adding overlays to OBS or vMix
 
-1. In OBS, add a **Browser Source**.
-2. Set the URL to one of the overlay URLs — the combined `/overlay/`, or the
-   split `/overlay/clock/` / `/overlay/penalty/` scenes — live above, or
-   `http://localhost:4000/overlay/...` when running locally.
-3. Set the width/height to match your canvas (e.g. 1920x1080).
-4. Leave "Shutdown source when not visible" unchecked so it keeps receiving
-   live updates.
-5. If you're using the split scenes, add `/overlay/clock/` and
-   `/overlay/penalty/` as two separate Browser Sources so you can position,
-   scale, or scene-switch them independently — e.g. keep the clock on screen
-   throughout but only bring in the penalty panel as its own scene during a
-   shootout.
+Open `/overlay/` and use **Copy link** on each overlay you want.
 
-The overlay background is transparent, so it composites directly over your
+**OBS:** Sources → **+** → **Browser**, paste the URL, set 1920 × 1080, and
+leave "Shutdown source when not visible" unchecked so it keeps receiving
+live updates. Add one Browser Source per overlay, e.g. keep the scoreboard on
+screen throughout and bring in the penalty panel only during a shootout.
+
+**vMix:** **Add Input** → **Web Browser**, paste the URL, 1920 × 1080, and put
+it on an Overlay channel to take it on and off air.
+
+Overlay backgrounds are transparent, so they composite directly over your
 camera/game capture.
 
 ## Architecture
@@ -234,13 +286,15 @@ gets its `innerHTML` replaced by whichever style's render function runs for
 the current state, with matching CSS scoped under `.board.style-<name>` in
 `overlay.css`. Each style's render function returns `{ main, penalty }` —
 the clock/team/score markup and the penalty-panel markup as separate pieces.
-`public/overlay/index.html` renders both (the combined view);
-`public/overlay/clock/index.html` and `public/overlay/penalty/index.html`
-set `window.OVERLAY_MODE` to `'clock'` or `'penalty'` before loading the same
-`overlay.js`/`overlay.css`, so only that piece renders. Adding a new style
+Each overlay page (`public/overlay/<name>/index.html`) sets
+`window.OVERLAY_MODE` — `'clock'`, `'penalty'`, `'goal'`, `'cardsSubs'` or
+`'list'` — before loading the same `overlay.js`/`overlay.css`, so only that
+piece renders. `public/overlay/index.html` is the gallery (`gallery.js` /
+`gallery.css`); its list of overlays is the `OVERLAYS` array in `gallery.js`. Adding a new style
 means adding one render function plus one CSS block; adding a new scene
 means adding a new folder whose `index.html` sets `OVERLAY_MODE` and includes
-the same shared JS/CSS — no server changes needed either way.
+the same shared JS/CSS, plus an entry in the gallery's `OVERLAYS` list — no
+server changes needed either way.
 
 State lives in memory only and resets when the server restarts — there's no
 database. That's a deliberate v1 boundary; if you need it to survive

@@ -342,3 +342,329 @@ footer {
 footer button {
   padding: 10px 24px;
 }
+
+/* ================= Match Events ================= */
+.ev-step {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  align-items: start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ev-step-label {
+  padding-top: 10px;
+  font-size: 13px;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.ev-types,
+.ev-teams,
+.ev-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ev-types button.active,
+.ev-teams button.active {
+  background: #2563eb;
+}
+
+.ev-types button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mini-card {
+  display: inline-block;
+  width: 10px;
+  height: 14px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.mini-card.yellow {
+  background: #facc15;
+}
+
+.mini-card.red {
+  background: #dc2626;
+}
+
+.mini-card.stacked {
+  margin-left: -5px;
+  transform: rotate(12deg);
+}
+
+.ev-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  padding: 6px 10px;
+  line-height: 1.1;
+}
+
+.ev-player b {
+  font-size: 20px;
+}
+
+.ev-player span {
+  font-size: 11px;
+  color: #cbd5e1;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ev-player:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ev-player:disabled:hover {
+  background: #334155;
+}
+
+.ev-player.off {
+  background: #7f1d1d;
+}
+
+.ev-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 4px 0 14px;
+}
+
+.ev-minute-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.ev-minute-field input,
+.squad input {
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.ev-minute-field input {
+  width: 96px;
+}
+
+.ev-hint {
+  margin: 0;
+}
+
+.ev-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #334155;
+}
+
+.ev-controls .penalty-toggle-row {
+  margin: 0;
+  gap: 12px;
+}
+
+.ev-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ev-log {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.ev-row {
+  display: grid;
+  grid-template-columns: 48px 28px 1fr auto auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: #0f172a;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.ev-row.on-air {
+  background: #1e293b;
+  outline: 1px solid #fbbf24;
+}
+
+.ev-min {
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.ev-icon {
+  display: flex;
+  align-items: center;
+}
+
+.ev-goal-icon,
+.ev-sub-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ev-sub-icon {
+  background: #334155;
+  font-size: 13px;
+}
+
+.ev-what {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ev-type {
+  color: #94a3b8;
+  margin-right: 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sub-off {
+  color: #f87171;
+}
+
+.sub-on {
+  color: #4ade80;
+}
+
+.ev-team {
+  font-size: 12px;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.ev-show {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.ev-empty {
+  font-size: 13px;
+  color: #94a3b8;
+  padding: 6px 0;
+}
+
+/* ================= Squads ================= */
+.squads {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.squad-title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.squad-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.squad-row,
+.squad-add {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.squad-row .ghost {
+  font-size: 16px;
+}
+
+.squad-add button {
+  padding: 7px 14px;
+  font-size: 14px;
+}
+
+.squad-paste {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.squad-paste summary {
+  cursor: pointer;
+}
+
+.squad-paste textarea {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+
+@media (max-width: 720px) {
+  .grid,
+  .squads {
+    grid-template-columns: 1fr;
+  }
+
+  .ev-step {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .ev-step-label {
+    padding-top: 0;
+  }
+
+  .ev-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

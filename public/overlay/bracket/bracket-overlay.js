@@ -1,4 +1,3 @@
-const socket = io();
 const board = document.getElementById('board');
 
 function esc(value) {
@@ -194,4 +193,21 @@ window.addEventListener('resize', fitAndCenter);
 // fonts.ready) happen to catch.
 setInterval(fitAndCenter, 1000);
 
-socket.on('state', render);
+// ?demo=1 renders a sample 8-team bracket instead of the live one (used by the
+// /overlay/ gallery previews).
+if (new URLSearchParams(location.search).has('demo')) {
+  const names = ['LIONS', 'FALCONS', 'EAGLES', 'WOLVES', 'TIGERS', 'SHARKS', 'BEARS', 'HAWKS'];
+  const colors = ['#1d4ed8', '#dc2626', '#16a34a', '#d97706', '#7c3aed', '#0891b2', '#db2777', '#65a30d'];
+  render({
+    style: new URLSearchParams(location.search).get('style') === 'neon' ? 'neon' : 'flags',
+    connectorColor: '#ffffff',
+    bracket: {
+      size: 8,
+      teams: names.map((name, i) => ({ name, color: colors[i], secondaryColor: '#ffffff', logo: null })),
+      picks: { 0: { 0: 'A', 1: 'B', 2: 'A', 3: 'A' }, 1: { 0: 'A' } },
+    },
+  });
+} else {
+  const socket = io();
+  socket.on('state', render);
+}

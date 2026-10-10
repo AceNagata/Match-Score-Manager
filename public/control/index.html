@@ -13,7 +13,7 @@
     <header>
       <h1>Match Score Manager</h1>
       <p>
-        Add <code id="overlay-url">/overlay/</code> as an OBS Browser Source (transparent background).
+        <a class="back-link" href="/overlay/" target="_blank" rel="noopener">Overlay links for OBS / vMix →</a>
         &nbsp;·&nbsp;<a class="back-link" href="bracket/">Bracket Maker →</a>
       </p>
       <div class="token-row">
@@ -131,6 +131,81 @@
         <div class="pen-slots" id="pen-row-a"></div>
         <div class="pen-slots" id="pen-row-b"></div>
       </section>
+      <section class="card full events-card">
+        <h2>Match Events</h2>
+        <div class="ev-step">
+          <span class="ev-step-label">1 &middot; Event</span>
+          <div class="ev-types" id="ev-types">
+            <button data-type="goal">Goal</button>
+            <button data-type="penaltyGoal">Penalty goal</button>
+            <button data-type="ownGoal">Own goal</button>
+            <button data-type="yellow"><span class="mini-card yellow"></span>Yellow card</button>
+            <button data-type="red"><span class="mini-card red"></span>Red card</button>
+            <button data-type="sub">Substitution</button>
+          </div>
+        </div>
+        <div class="ev-step">
+          <span class="ev-step-label">2 &middot; Team</span>
+          <div class="ev-teams">
+            <button data-team="teamA" id="ev-team-a">Team 1</button>
+            <button data-team="teamB" id="ev-team-b">Team 2</button>
+          </div>
+        </div>
+        <div class="ev-step">
+          <span class="ev-step-label" id="ev-player-label">3 &middot; Player</span>
+          <div class="ev-players" id="ev-players"></div>
+        </div>
+        <div class="ev-meta">
+          <label class="ev-minute-field">
+            <span>Minute</span>
+            <input type="text" id="ev-minute" maxlength="6" autocomplete="off" />
+          </label>
+          <p class="hint ev-hint" id="ev-hint"></p>
+        </div>
+        <div class="ev-controls">
+          <div class="penalty-toggle-row">
+            <span>Show event list on overlay</span>
+            <button id="events-list-toggle" class="toggle">Off</button>
+          </div>
+          <button id="popup-hide">Hide pop-up now</button>
+        </div>
+        <ol class="ev-log" id="ev-log"></ol>
+      </section>
+
+      <section class="card full squads-card">
+        <h2>Squads</h2>
+        <p class="hint">Add each team's players once. Their shirt numbers become the buttons you tap in Match Events.</p>
+        <div class="squads">
+          <div class="squad" data-team="teamA">
+            <h3 class="squad-title" id="squad-title-a">Team 1</h3>
+            <div class="squad-list" id="squad-list-a"></div>
+            <form class="squad-add" data-team="teamA">
+              <input type="number" min="0" max="99" placeholder="#" required />
+              <input type="text" maxlength="24" placeholder="Player name (optional)" />
+              <button type="submit" class="primary">Add</button>
+            </form>
+            <details class="squad-paste">
+              <summary>Paste a lineup</summary>
+              <textarea rows="6" placeholder="One player per line, e.g.&#10;1 Goalkeeper&#10;10 Captain"></textarea>
+              <button type="button" class="squad-paste-btn" data-team="teamA">Replace squad</button>
+            </details>
+          </div>
+          <div class="squad" data-team="teamB">
+            <h3 class="squad-title" id="squad-title-b">Team 2</h3>
+            <div class="squad-list" id="squad-list-b"></div>
+            <form class="squad-add" data-team="teamB">
+              <input type="number" min="0" max="99" placeholder="#" required />
+              <input type="text" maxlength="24" placeholder="Player name (optional)" />
+              <button type="submit" class="primary">Add</button>
+            </form>
+            <details class="squad-paste">
+              <summary>Paste a lineup</summary>
+              <textarea rows="6" placeholder="One player per line, e.g.&#10;1 Goalkeeper&#10;10 Captain"></textarea>
+              <button type="button" class="squad-paste-btn" data-team="teamB">Replace squad</button>
+            </details>
+          </div>
+        </div>
+      </section>
     </div>
 
     <footer>
@@ -141,5 +216,6 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="/shared/image-utils.js"></script>
   <script src="control.js"></script>
+  <script src="events.js"></script>
 </body>
 </html>
