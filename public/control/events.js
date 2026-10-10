@@ -11,6 +11,7 @@ const EVENT_LABELS = {
   sub: 'Substitution',
 };
 
+const GOAL_EVENT_TYPES = ['goal', 'penaltyGoal', 'ownGoal'];
 const evSelection = { type: null, team: 'teamA', offId: null };
 let lastSquadKey = { teamA: '', teamB: '' };
 let lastLogKey = '';
@@ -67,8 +68,19 @@ function renderPicker(state) {
   if (playersEl.dataset.key !== key) {
     playersEl.dataset.key = key;
     playersEl.innerHTML = '';
+    if (GOAL_EVENT_TYPES.includes(evSelection.type)) {
+      const none = document.createElement('button');
+      none.className = 'ev-player ev-no-player';
+      none.textContent = 'No player';
+      none.title = 'Log the goal without a scorer: the pop-up shows just the team and the time';
+      none.addEventListener('click', () => pickPlayer(null));
+      playersEl.appendChild(none);
+    }
     if (!squad.length) {
-      playersEl.innerHTML = '<span class="ev-empty">No players yet. Add this team’s squad below.</span>';
+      const empty = document.createElement('span');
+      empty.className = 'ev-empty';
+      empty.textContent = 'No players yet. Add this team’s squad below.';
+      playersEl.appendChild(empty);
     }
     squad.forEach((player) => {
       const btn = document.createElement('button');
@@ -87,6 +99,8 @@ function renderPicker(state) {
     hint.textContent = 'Own goal: pick the team of the player who put it in their own net. The goal counts for the other side.';
   } else if (evSelection.type === 'sub') {
     hint.textContent = evSelection.offId ? 'Now tap the player coming on.' : 'Tap the player going off first.';
+  } else if (GOAL_EVENT_TYPES.includes(evSelection.type)) {
+    hint.textContent = `${EVENT_LABELS[evSelection.type]}: tap the player, or "No player" to pop up just the team and the time.`;
   } else {
     hint.textContent = `${EVENT_LABELS[evSelection.type]}: tap the player.`;
   }
@@ -117,7 +131,7 @@ function pickPlayer(player) {
     }
     send({ type: 'eventAdd', eventType: 'sub', team: evSelection.team, playerId: evSelection.offId, playerOnId: player.id, minute });
   } else {
-    send({ type: 'eventAdd', eventType: evSelection.type, team: evSelection.team, playerId: player.id, minute });
+    send({ type: 'eventAdd', eventType: evSelection.type, team: evSelection.team, playerId: player ? player.id : null, minute });
   }
   resetSelection();
   renderPicker(latestState);
@@ -170,7 +184,8 @@ function renderLog(state) {
     const who =
       event.type === 'sub'
         ? `<span class="sub-off">▼ ${escHtml(playerText(event.player))}</span> <span class="sub-on">▲ ${escHtml(playerText(event.playerOn))}</span>`
-        : escHtml(playerText(event.player)) + (event.type === 'ownGoal' ? ' <em>(OG)</em>' : '');
+        : (event.player ? escHtml(playerText(event.player)) : '<em class="ev-noplayer">no player</em>') +
+          (event.type === 'ownGoal' ? ' <em>(OG)</em>' : '');
     li.innerHTML = `
       <span class="ev-min">${escHtml(event.minute)}</span>
       <span class="ev-icon">${eventIcon(event.type)}</span>

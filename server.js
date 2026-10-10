@@ -203,8 +203,10 @@ function scoringTeam(event) {
 function addEvent(patch) {
   if (!VALID_EVENT_TYPES.includes(patch.eventType) || !TEAMS.includes(patch.team)) return;
   const team = state[patch.team];
-  const player = team.squad.find((p) => p.id === patch.playerId);
-  if (!player) return;
+  // A goal can be logged without naming the scorer; the overlay then shows just team and time.
+  const noPlayer = GOAL_TYPES.includes(patch.eventType) && !patch.playerId;
+  const player = noPlayer ? null : team.squad.find((p) => p.id === patch.playerId);
+  if (!noPlayer && !player) return;
   const event = {
     id: crypto.randomUUID(),
     type: patch.eventType,
@@ -212,7 +214,7 @@ function addEvent(patch) {
     seconds: state.timer.seconds,
     minute: cleanMinute(patch.minute) || minuteFromSeconds(state.timer.seconds),
     player: snapshotPlayer(player),
-    playerId: player.id,
+    playerId: player ? player.id : null,
   };
   if (event.type === 'sub') {
     const on = team.squad.find((p) => p.id === patch.playerOnId);
@@ -559,14 +561,31 @@ function afterPatch() {
   }
 }
 
+// The scoreboard's "-" button. If that team's latest goal was logged without a scorer (which is
+// what "+" does), take the event back so the log and the pop-up stay honest; otherwise
+// (the latest goal names a player, or there is none to take back) just lower the number.
+function undoGoal(team) {
+  const latest = [...state.events].reverse().find((e) => GOAL_TYPES.includes(e.type) && scoringTeam(e) === team);
+  if (latest && !latest.player) removeEvent(latest.id);
+  else state[team].score = Math.max(0, state[team].score - 1);
+}
+
 function applyPatch(patch) {
   switch (patch.type) {
     case 'setName':
       state[patch.team].name = String(patch.value).slice(0, 24);
       break;
-    case 'incrementScore':
-      state[patch.team].score = Math.max(0, state[patch.team].score + patch.delta);
+    case 'incrementScore': {
+      if (!TEAMS.includes(patch.team)) break;
+      // "+" is a goal: it's logged as an event (team + clock minute, no scorer) so the goal
+      // pop-up shows without anyone having to pick a player.
+      const steps = Math.max(-20, Math.min(20, Math.trunc(Number(patch.delta)) || 0));
+      for (let i = 0; i < Math.abs(steps); i += 1) {
+        if (steps > 0) addEvent({ eventType: 'goal', team: patch.team });
+        else undoGoal(patch.team);
+      }
       break;
+    }
     case 'setColor':
       state[patch.team].color = patch.value;
       break;

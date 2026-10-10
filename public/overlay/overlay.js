@@ -152,7 +152,7 @@ function goalSplash(state, event) {
         <div class="gs-word${tag ? ' has-tag' : ''}">${tag ? `<span class="gs-tag">${tag}</span>` : ''}GOAL</div>
         <div class="gs-info">
           ${teamChip(team)}
-          <span class="gs-player">${BALL_SVG}${playerLabel(event.player)}${og}<span class="gs-min">${esc(event.minute)}</span></span>
+          <span class="gs-player${event.player ? '' : ' no-player'}">${BALL_SVG}${playerLabel(event.player)}${og}<span class="gs-min">${esc(event.minute)}</span></span>
         </div>
         <div class="gs-score">
           <span class="${scorer === 'teamA' ? 'hit' : ''}">${score.teamA}</span><span class="dash">-</span><span class="${scorer === 'teamB' ? 'hit' : ''}">${score.teamB}</span>
@@ -230,7 +230,7 @@ function renderEventList(state) {
       const who =
         event.type === 'sub'
           ? `${playerLabel(event.playerOn)} <span class="for">for</span> ${playerLabel(event.player)}`
-          : playerLabel(event.player) + (event.type === 'ownGoal' ? ' <span class="og">(OG)</span>' : '');
+          : (event.player ? playerLabel(event.player) : esc(team.name)) + (event.type === 'ownGoal' ? ' <span class="og">(OG)</span>' : '');
       return `<div class="el-row"><span class="el-swatch" style="background:${team.color || '#64748b'}"></span><span class="el-min">${esc(event.minute)}</span><span class="el-icon">${listIcon(event.type)}</span><span class="el-who">${who}</span></div>`;
     })
     .join('');

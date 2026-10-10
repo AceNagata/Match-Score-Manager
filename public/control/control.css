@@ -435,6 +435,22 @@ footer button {
   background: #7f1d1d;
 }
 
+.ev-player.ev-no-player {
+  align-self: stretch;
+  font-size: 14px;
+  background: transparent;
+  border: 1px dashed #64748b;
+  color: #e2e8f0;
+}
+
+.ev-player.ev-no-player:hover {
+  background: #334155;
+}
+
+.ev-noplayer {
+  color: #94a3b8;
+}
+
 .ev-meta {
   display: flex;
   align-items: center;

@@ -138,13 +138,23 @@ The control panel has two more cards:
   event is logged at the current clock minute (`minute` = whole minutes
   played + 1, so 02:20 is `3'`), or at whatever you type in the Minute box
   first (`45+2`). A substitution takes two taps: the player going off, then
-  the player coming on.
+  the player coming on. For the three goal types there is also a **No
+  player** button (handy when you don't know the scorer, or haven't entered
+  squads): it logs the goal with just the team and the clock minute.
 
 What each event does:
 
 - Goals add 1 to the scoring team's score. An own goal is logged against the
   player's own team and counts for the other side. Deleting a goal event from
   the log takes the point back off.
+- **The scoreboard's "+" button is a goal too.** It logs a goal with no
+  player (team + clock minute), so the goal pop-up fires even when nobody
+  picks a scorer; the splash then shows just the team, the time and the
+  updated score, and the event list shows the team name in place of a
+  player. "−" takes back that team's latest goal if it was logged this way
+  (event and pop-up included); if the latest goal names a player it only
+  lowers the number, as before. Only goals are allowed without a player —
+  cards and substitutions still need one.
 - A second yellow for the same player is logged as `secondYellow` and shown
   as a yellow + red card.
 - Every new event pops up on the overlay: goals as a full-width animated
@@ -159,7 +169,7 @@ What each event does:
 State: `state.teamA.squad` / `teamB.squad` (`{ id, number, name }`),
 `state.events` (`{ id, type, team, minute, seconds, player, playerOn?,
 scoreAfter? }`, with player data copied in so later squad edits don't change
-history), `state.popup` (`{ seq, eventId, kind }`, `seq` bumps on every show so
+history; `player` is `null` for a goal logged without a scorer), `state.popup` (`{ seq, eventId, kind }`, `seq` bumps on every show so
 the overlay only restarts the animation for a new pop-up, not on every
 clock tick) and `state.eventsListActive`. "Start This Match" from the
 bracket clears squads and events for the new pairing; "End Match" leaves

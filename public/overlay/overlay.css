@@ -482,6 +482,17 @@ html, body {
   font-weight: 700;
 }
 
+/* No scorer named: the time is the only detail, so let it carry the line. */
+.gs-player.no-player {
+  gap: 12px;
+}
+
+.gs-player.no-player .gs-min {
+  margin-left: 0;
+  padding: 3px 14px;
+  font-size: 24px;
+}
+
 .gs-score {
   display: flex;
   align-items: center;
