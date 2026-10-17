@@ -252,6 +252,24 @@ to that browser's `localStorage` and attaches it to every update it sends.
 The overlay pages don't need a token — they only ever read state, never
 write it.
 
+So a device that only has the URL can *see* everything (scoreboard, saved
+tournaments, bracket) but can't change anything. When it tries, the server
+replies to just that client with `control:rejected` and the page shows a red
+"Your changes aren't going through" bar plus "Token not accepted" next to the
+token field — before this, refused changes were dropped without a word and the
+page looked frozen.
+
+**Giving someone else control (e.g. a friend on a phone).** On a device that
+already has the token, press **Copy phone link** next to the token field and
+send them the link. It looks like `https://…/control/#token=<token>`: opening
+it saves the token in their browser and removes it from the address bar, after
+which everything works the same as on your device. The token is in the URL
+*fragment*, which browsers never send to the server, so it isn't written to
+Cloud Run's request logs or fetched by chat link previews. (A link pasted into
+a page that's already open also works.) Anyone holding the link has full
+control of the match, so only send it to people you trust, and
+rotate the token (below) to cut someone off.
+
 **This matters in practice, not just in theory:** within a few minutes of
 the first `--allow-unauthenticated` deploy (before this token gate existed),
 something external had already connected and started changing the score,
@@ -273,7 +291,8 @@ gcloud run services update match-score-manager --region us-central1 \
 
 Then update the token in the control panel's "Access token" field on every
 device/browser that uses it (old sessions won't be able to write until you
-do). Locally (`npm start`), `CONTROL_TOKEN` is unset by default, so local dev
+do; they'll see the red warning bar), and send a fresh phone link to anyone
+who needs one. Locally (`npm start`), `CONTROL_TOKEN` is unset by default, so local dev
 has no token gate — that's fine since it's bound to localhost only.
 
 ## Adding overlays to OBS or vMix

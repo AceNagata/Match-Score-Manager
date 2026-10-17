@@ -887,7 +887,11 @@ io.on('connection', (socket) => {
 
   socket.on('control:update', (patch) => {
     if (!patch || typeof patch.type !== 'string') return;
-    if (CONTROL_TOKEN && patch.token !== CONTROL_TOKEN) return;
+    if (CONTROL_TOKEN && patch.token !== CONTROL_TOKEN) {
+      // Tell only the sender, so the page can say why nothing happened.
+      socket.emit('control:rejected');
+      return;
+    }
     if (ASYNC_TOURNAMENT_PATCHES.has(patch.type)) {
       runTournamentPatch(patch);
       return;

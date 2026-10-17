@@ -40,6 +40,7 @@ header p {
 
 .token-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   margin-bottom: 24px;
@@ -73,6 +74,55 @@ header p {
 
 .token-status.missing {
   color: #f87171;
+}
+
+.token-status {
+  flex-basis: 100%;
+}
+
+.token-row button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.access-banner {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #7f1d1d;
+  color: #fee2e2;
+  font-size: 14px;
+  line-height: 1.35;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.access-banner[hidden] {
+  display: none;
+}
+
+.access-banner span {
+  flex: 1;
+}
+
+.access-banner button {
+  flex-shrink: 0;
+  background: #fee2e2;
+  color: #7f1d1d;
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.access-banner button:hover {
+  background: #fff;
 }
 
 header p code {

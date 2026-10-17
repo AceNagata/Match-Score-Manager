@@ -8,32 +8,10 @@ let latestBracket = null;
 let latestRoster = [];
 let latestLive = null;
 
-function getToken() {
-  return localStorage.getItem('controlToken') || '';
-}
-
-function renderTokenStatus() {
-  const status = document.getElementById('token-status');
-  if (getToken()) {
-    status.textContent = 'Saved on this device';
-    status.className = 'token-status ok';
-  } else {
-    status.textContent = 'No token set — updates will be rejected if the server requires one';
-    status.className = 'token-status missing';
-  }
-}
-
-document.getElementById('access-token').value = getToken();
-renderTokenStatus();
-
-document.getElementById('token-save').addEventListener('click', () => {
-  const value = document.getElementById('access-token').value.trim();
-  localStorage.setItem('controlToken', value);
-  renderTokenStatus();
-});
+Access.init(socket);
 
 function send(patch) {
-  socket.emit('control:update', { ...patch, token: getToken() });
+  socket.emit('control:update', { ...patch, token: Access.getToken() });
 }
 
 let pendingTimers = {};
